@@ -36,3 +36,109 @@ async function importBulk(){
  await base.update(updates); const count=parsedRows.length; parsedRows=[]; bulkFile.value="";bulkPaste.value="";bulkDeadline.value="";importPreview.textContent="لم يتم تحميل بيانات بعد.";showToast(`تم استيراد ${count} عميل`);
 }
 db.ref("tasks").on("value",snap=>{const all=snap.val()||{};taskCounts.innerHTML=employees.map(e=>{const s=calc(tasksArray(all[e.number]));return `<div class="card"><small>${esc(e.name)}</small><strong>${s.total}</strong><small>مهمة</small></div>`}).join("")});
+
+
+function isTaskOverdue(task){
+  if(!task || !task.deadline) return false;
+  const finished = task.status === "تم التحويل إلى عميل" || task.status === "مكتمل";
+  if(finished) return false;
+
+  const end = new Date(task.deadline + "T23:59:59");
+  return end.getTime() < Date.now();
+}
+
+function employeeByNumber(number){
+  return employees.find(e => e.number === String(number));
+}
+
+db.ref("tasks").on("value", snap => {
+  const all = snap.val() || {};
+  const overdue = [];
+
+  employees.forEach(emp => {
+    tasksArray(all[emp.number]).forEach(task => {
+      if(isTaskOverdue(task)){
+        overdue.push({ employee: emp, task });
+      }
+    });
+  });
+
+  overdue.sort((a,b) => String(a.task.deadline).localeCompare(String(b.task.deadline)));
+
+  const empty = overdue.length === 0;
+  overdueEmpty.classList.toggle("hidden", !empty);
+  overdueWrap.classList.toggle("hidden", empty);
+
+  overdueBody.innerHTML = overdue.map(({employee,task}) => `
+    <tr>
+      <td><strong>${esc(employee.name)}</strong><br><small style="color:var(--muted)">#${employee.number}</small></td>
+      <td>${esc(task.clientName || "—")}</td>
+      <td><strong style="color:var(--red)">${esc(task.deadline || "—")}</strong></td>
+      <td>${esc(task.status || "جديد")}</td>
+      <td>
+        <button class="action warning-action" onclick="openEmailModal('${employee.number}','${task.id}')">
+          ✉️ إرسال تنبيه
+        </button>
+      </td>
+    </tr>
+  `).join("");
+});
+
+function openEmailModal(employeeNumber, taskId){
+  const emp = employeeByNumber(employeeNumber);
+  if(!emp) return;
+
+  db.ref("tasks/" + employeeNumber + "/" + taskId).once("value").then(snap => {
+    const task = snap.val() || {};
+
+    emailEmployeeNumber.value = employeeNumber;
+    emailTaskId.value = taskId;
+    emailEmployeeName.value = emp.name;
+
+    // Remember a previously entered email for this employee on this browser.
+    employeeEmail.value = localStorage.getItem("employeeEmail_" + employeeNumber) || "";
+
+    emailSubject.value = "تنبيه بخصوص تأخر تسليم المهمة";
+
+    const deadlineText = task.deadline ? ` بتاريخ ${task.deadline}` : "";
+    emailMessage.value =
+`مرحبًا ${emp.name}،
+
+نود تنبيهك بأن المهمة الخاصة بالعميل "${task.clientName || "المهمة المسندة إليك"}" كان موعد تسليمها${deadlineText} ولم يتم إكمالها حتى الآن.
+
+يرجى إكمال وتسليم العمل خلال 24 ساعة من استلام هذا التنبيه.
+في حال عدم التسليم خلال هذه المدة، قد تتأثر نسبة الأداء والإنجاز المسجلة في النظام.
+
+شكرًا لك،
+إدارة الريادة البصرية`;
+
+    emailModal.classList.add("show");
+  });
+}
+
+function closeEmailModal(){
+  emailModal.classList.remove("show");
+}
+
+function sendWarningEmail(){
+  const email = employeeEmail.value.trim();
+  const subject = emailSubject.value.trim();
+  const message = emailMessage.value.trim();
+  const employeeNumber = emailEmployeeNumber.value;
+
+  if(!email){
+    alert("أدخل البريد الإلكتروني للموظف");
+    return;
+  }
+
+  localStorage.setItem("employeeEmail_" + employeeNumber, email);
+
+  const mailto =
+    "mailto:" + encodeURIComponent(email) +
+    "?subject=" + encodeURIComponent(subject) +
+    "&body=" + encodeURIComponent(message);
+
+  window.location.href = mailto;
+  closeEmailModal();
+  showToast("تم تجهيز رسالة التنبيه");
+}

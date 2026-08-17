@@ -8,6 +8,73 @@
 <div class="field"><label>أو الصق البيانات مباشرة — كل سطر: الاسم، الرقم</label><textarea id="bulkPaste" placeholder="خالد محمد,0501234567&#10;سارة أحمد,0551234567"></textarea></div>
 <div id="importPreview" class="empty" style="padding:18px">لم يتم تحميل بيانات بعد.</div>
 <div class="modal-actions"><button class="secondary" onclick="previewBulk()">معاينة</button><button class="primary" onclick="importBulk()">استيراد وإرسال</button></div></section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h3>⏰ المهام المتأخرة</h3>
+      <p style="color:var(--muted);margin:5px 0 0">المهام التي انتهى تاريخها ولم يتم تحويلها إلى عميل أو إكمالها.</p>
+    </div>
+  </div>
+  <div id="overdueEmpty" class="empty" style="padding:28px">لا توجد مهام متأخرة حاليًا 🎉</div>
+  <div id="overdueWrap" class="table-wrap hidden">
+    <table>
+      <thead>
+        <tr>
+          <th>الموظف</th>
+          <th>العميل</th>
+          <th>تاريخ الانتهاء</th>
+          <th>الحالة</th>
+          <th>الإجراء</th>
+        </tr>
+      </thead>
+      <tbody id="overdueBody"></tbody>
+    </table>
+  </div>
+</section>
+
 <section class="panel"><h3>أعداد المهام الحالية</h3><div id="taskCounts" class="stats" style="margin-bottom:0"></div></section>
 </div><div class="footer">© 2026 نظام أداء الموظفين</div></main></div>
+
+<div id="emailModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>إرسال تنبيه تأخير</h3>
+      <button class="close" onclick="closeEmailModal()">✕</button>
+    </div>
+
+    <input type="hidden" id="emailEmployeeNumber">
+    <input type="hidden" id="emailTaskId">
+
+    <div class="field">
+      <label>الموظف</label>
+      <input id="emailEmployeeName" disabled>
+    </div>
+
+    <div class="field">
+      <label>البريد الإلكتروني للموظف</label>
+      <input id="employeeEmail" type="email" placeholder="employee@example.com">
+    </div>
+
+    <div class="field">
+      <label>عنوان الرسالة</label>
+      <input id="emailSubject">
+    </div>
+
+    <div class="field">
+      <label>نص التنبيه</label>
+      <textarea id="emailMessage"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="primary" onclick="sendWarningEmail()">فتح البريد وإرسال التنبيه</button>
+      <button class="secondary" onclick="closeEmailModal()">إلغاء</button>
+    </div>
+
+    <p style="color:var(--muted);font-size:12px;margin-top:14px">
+      في هذه النسخة يفتح برنامج البريد برسالة جاهزة. الإرسال التلقائي بالكامل يحتاج خدمة بريد أو Firebase Cloud Functions لاحقًا.
+    </p>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div><script src="firebase.js"></script><script src="manager-common.js"></script><script src="tasks.js"></script></body></html>
