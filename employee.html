@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوابة الموظف</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mini-logo">📞</div>
+      <div><h1>بوابة الموظف</h1><p>مهام التواصل</p></div>
+    </div>
+
+    <nav class="menu">
+      <a class="active" href="employee.html">🏠 مهامي</a>
+      <a href="#">📊 أدائي</a>
+      <button onclick="logout()">↪ تسجيل خروج</button>
+    </nav>
+
+    <div class="user-box">
+      <strong id="empSideName"></strong>
+      <small id="empSideNumber"></small>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <strong>نظام أداء الموظفين</strong>
+      <span id="empTopName"></span>
+    </header>
+
+    <div class="content">
+      <section class="head">
+        <div>
+          <h2>مرحبًا <span id="welcomeName"></span> 👋</h2>
+          <p>كل عميل يرسله المدير يظهر هنا كمهمة مستقلة.</p>
+        </div>
+
+        <div class="card" style="min-width:160px">
+          <small>نسبة التواصل</small>
+          <strong id="empScore">0%</strong>
+        </div>
+      </section>
+
+      <section class="target-box">
+        <div class="target-head">
+          <div>
+            <h3 style="margin:0 0 5px">🎯 التارقت الشهري</h3>
+            <small style="color:var(--muted)">5 عملاء فعليين</small>
+          </div>
+          <div class="target-number"><span id="empWon">0</span> / 5</div>
+        </div>
+
+        <div class="progress"><span id="targetBar" style="width:0%"></span></div>
+      </section>
+
+      <section class="stats">
+        <div class="card"><small>إجمالي المهام</small><strong id="empTotal">0</strong></div>
+        <div class="card"><small>تم التواصل</small><strong id="empContacted">0</strong></div>
+        <div class="card"><small>عملاء مكتسبون</small><strong id="empWon2">0</strong></div>
+        <div class="card"><small>مؤجل</small><strong id="empPostponed">0</strong></div>
+        <div class="card"><small>متبقي للتارقت</small><strong id="empRemaining">5</strong></div>
+      </section>
+
+      <section class="panel">
+        <h3>مهام التواصل</h3>
+
+        <div id="employeeEmpty" class="empty">
+          <div class="emoji">📭</div>
+          <strong>لا توجد مهام حتى الآن</strong>
+          <div style="margin-top:6px">عند إضافة نورة عميلًا لك سيظهر هنا مباشرة.</div>
+        </div>
+
+        <div id="employeeTableWrap" class="table-wrap hidden">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم العميل</th>
+                <th>رقم التواصل</th>
+                <th>الحالة</th>
+                <th>الملاحظة</th>
+                <th>حفظ</th>
+              </tr>
+            </thead>
+            <tbody id="employeeTasksBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer">© 2026 نظام أداء الموظفين</div>
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="firebase.js"></script>
+<script src="employee.js"></script>
+</body>
+</html>

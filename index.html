@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+</head>
+<body>
+<section class="login-page">
+  <div class="login-side">
+    <div class="login-brand">
+      <div class="login-logo">📈</div>
+      <h1>نظام أداء الموظفين</h1>
+      <p>دخول المدير والموظفين من صفحة واحدة، وكل حساب يفتح صفحته الخاصة.</p>
+    </div>
+  </div>
+
+  <div class="login-form-wrap">
+    <div class="login-card">
+      <h2>تسجيل الدخول</h2>
+      <p>أدخل الاسم والرقم الوظيفي.</p>
+
+      <div class="field">
+        <label>الاسم</label>
+        <input id="loginName" autocomplete="off" placeholder="مثال: نورة">
+      </div>
+
+      <div class="field">
+        <label>الرقم الوظيفي</label>
+        <input id="loginNumber" type="password" inputmode="numeric">
+      </div>
+
+      <button class="login-btn" onclick="login()">دخول</button>
+      <div id="loginError" class="error">الاسم أو الرقم الوظيفي غير صحيح.</div>
+
+      <div class="connection">
+        <span id="connectionDot" class="dot"></span>
+        <span id="connectionText">جاري الاتصال بـ Firebase...</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="firebase.js"></script>
+<script src="login.js"></script>
+</body>
+</html>
