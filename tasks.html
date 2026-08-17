@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>المهام</title><link rel="stylesheet" href="style.css"><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script></head><body>
+<div class="app"><aside class="sidebar"><div class="brand">
+      <div class="institution-brand">
+        <img class="institution-logo" src="visual-leadership-logo.jpg" alt="شعار الريادة البصرية">
+        <div class="institution-text">
+          <strong>الريادة البصرية</strong>
+          <span>Visual Leadership</span>
+        </div>
+      </div>
+    </div><nav class="menu"><a href="manager.html">⌂ الصفحة العامة</a><a href="employees.html">👥 الموظفون</a><a class="active" href="tasks.html">📋 المهام</a><a href="reports.html">📈 التقارير</a><button onclick="managerLogout()">↪ تسجيل خروج</button></nav><div class="user-box"><strong>نورة</strong><small>مدير النظام</small><small>الرقم الوظيفي: 2000</small></div></aside>
+<main class="main"><header class="topbar">
+      <div class="topbar-brand">
+        <img src="visual-leadership-logo.jpg" alt="شعار الريادة البصرية">
+        <span>الريادة البصرية</span>
+      </div><span>المهام</span></header><div class="content">
+<section class="head"><div><h2>إرسال مهام التواصل</h2><p>أضف عميلًا واحدًا أو ارفع مئات العملاء دفعة واحدة.</p></div></section>
+<section class="panel"><h3>إضافة عميل واحد</h3><div class="grid"><div class="field"><label>الموظف</label><select id="singleEmployee"><option value="1890">أريام</option><option value="1818">طيف</option><option value="1018">أحمد</option></select></div><div class="field"><label>اسم العميل</label><input id="singleName"></div><div class="field"><label>رقم التواصل</label><input id="singlePhone"></div><div class="field"><label>ملاحظة</label><input id="singleNote"></div></div><button class="primary" onclick="addSingleTask()">إرسال المهمة</button></section>
+<section class="panel"><h3>استيراد جماعي للعملاء</h3><p style="color:var(--muted)">ارفع ملف Excel أو CSV. الأعمدة المفضلة: <b>الاسم</b> و<b>رقم التواصل</b>. ويمكن أيضًا استخدام Name / Phone.</p>
+<div class="grid"><div class="field"><label>إرسال القائمة إلى</label><select id="bulkEmployee"><option value="1890">أريام</option><option value="1818">طيف</option><option value="1018">أحمد</option></select></div><div class="field"><label>ملف Excel / CSV</label><input id="bulkFile" type="file" accept=".xlsx,.xls,.csv"></div></div>
+<div class="field"><label>أو الصق البيانات مباشرة — كل سطر: الاسم، الرقم</label><textarea id="bulkPaste" placeholder="خالد محمد,0501234567&#10;سارة أحمد,0551234567"></textarea></div>
+<div id="importPreview" class="empty" style="padding:18px">لم يتم تحميل بيانات بعد.</div>
+<div class="modal-actions"><button class="secondary" onclick="previewBulk()">معاينة</button><button class="primary" onclick="importBulk()">استيراد وإرسال</button></div></section>
+<section class="panel"><h3>أعداد المهام الحالية</h3><div id="taskCounts" class="stats" style="margin-bottom:0"></div></section>
+</div><div class="footer">© 2026 نظام أداء الموظفين</div></main></div>
+<div id="toast" class="toast"></div><script src="firebase.js"></script><script src="manager-common.js"></script><script src="tasks.js"></script></body></html>

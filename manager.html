@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>لوحة المدير</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -10,116 +9,44 @@
 </head>
 <body>
 <div class="app">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="mini-logo">📊</div>
-      <div><h1>لوحة المدير</h1><p>إدارة الفريق</p></div>
-    </div>
-
-    <nav class="menu">
-      <a class="active" href="manager.html">⌂ الصفحة العامة</a>
-      <a href="#">👥 الموظفون</a>
-      <a href="#">📋 المهام</a>
-      <a href="#">📈 التقارير</a>
-      <button onclick="logout()">↪ تسجيل خروج</button>
-    </nav>
-
-    <div class="user-box">
-      <strong>نورة</strong>
-      <small>مدير النظام</small>
-      <small>الرقم الوظيفي: 2000</small>
-    </div>
-  </aside>
-
-  <main class="main">
-    <header class="topbar">
-      <strong>نظام أداء الموظفين</strong>
-      <span>المدير: نورة</span>
-    </header>
-
-    <div class="content">
-      <section class="head">
-        <div>
-          <h2>أداء الموظفين</h2>
-          <p>إرسال مهام التواصل ومتابعة النتائج لحظيًا.</p>
+<aside class="sidebar">
+  <div class="brand">
+      <div class="institution-brand">
+        <img class="institution-logo" src="visual-leadership-logo.jpg" alt="شعار الريادة البصرية">
+        <div class="institution-text">
+          <strong>الريادة البصرية</strong>
+          <span>Visual Leadership</span>
         </div>
-      </section>
-
-      <section class="stats">
-        <div class="card"><small>الموظفون</small><strong id="mgrEmpCount">3</strong></div>
-        <div class="card"><small>إجمالي المهام</small><strong id="mgrTaskCount">0</strong></div>
-        <div class="card"><small>تم التواصل</small><strong id="mgrContacted">0</strong></div>
-        <div class="card"><small>عملاء مكتسبون</small><strong id="mgrWon">0</strong></div>
-        <div class="card"><small>متوسط الإنجاز</small><strong id="mgrAvg">0%</strong></div>
-      </section>
-
-      <section class="panel">
-        <h3>الموظفون</h3>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>الموظف</th>
-                <th>الرقم الوظيفي</th>
-                <th>التارقت الشهري</th>
-                <th>المهام</th>
-                <th>تم التواصل</th>
-                <th>عملاء مكتسبون</th>
-                <th>نسبة الإنجاز</th>
-                <th>الإجراء</th>
-              </tr>
-            </thead>
-            <tbody id="managerEmployeesBody"></tbody>
-          </table>
-        </div>
-      </section>
-    </div>
-
-    <div class="footer">© 2026 نظام أداء الموظفين</div>
-  </main>
-</div>
-
-<div id="taskModal" class="modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3>إضافة عميل للموظف</h3>
-      <button class="close" onclick="closeTaskModal()">✕</button>
-    </div>
-
-    <input id="taskEmpNumber" type="hidden">
-
-    <div class="field">
-      <label>الموظف</label>
-      <input id="taskEmpName" disabled>
-    </div>
-
-    <div class="grid">
-      <div class="field">
-        <label>اسم العميل</label>
-        <input id="clientName" placeholder="اسم العميل">
-      </div>
-
-      <div class="field">
-        <label>رقم التواصل</label>
-        <input id="clientPhone" placeholder="05xxxxxxxx">
       </div>
     </div>
-
-    <div class="field">
-      <label>ملاحظة للموظف - اختياري</label>
-      <textarea id="managerNote"></textarea>
-    </div>
-
-    <div class="modal-actions">
-      <button class="primary" onclick="addTask()">إرسال المهمة</button>
-      <button class="secondary" onclick="closeTaskModal()">إلغاء</button>
-    </div>
-  </div>
+  <nav class="menu">
+    <a class="active" href="manager.html">⌂ الصفحة العامة</a>
+    <a href="employees.html">👥 الموظفون</a>
+    <a href="tasks.html">📋 المهام</a>
+    <a href="reports.html">📈 التقارير</a>
+    <button onclick="managerLogout()">↪ تسجيل خروج</button>
+  </nav>
+  <div class="user-box"><strong>نورة</strong><small>مدير النظام</small><small>الرقم الوظيفي: 2000</small></div>
+</aside>
+<main class="main">
+<header class="topbar">
+      <div class="topbar-brand">
+        <img src="visual-leadership-logo.jpg" alt="شعار الريادة البصرية">
+        <span>الريادة البصرية</span>
+      </div><span>المدير: نورة</span></header>
+<div class="content">
+  <section class="head"><div><h2>الصفحة العامة</h2><p>ملخص مباشر لأداء الفريق.</p></div></section>
+  <section class="stats">
+    <div class="card"><small>الموظفون</small><strong id="mgrEmpCount">3</strong></div>
+    <div class="card"><small>إجمالي المهام</small><strong id="mgrTaskCount">0</strong></div>
+    <div class="card"><small>تم التواصل</small><strong id="mgrContacted">0</strong></div>
+    <div class="card"><small>عملاء مكتسبون</small><strong id="mgrWon">0</strong></div>
+    <div class="card"><small>متوسط الإنجاز</small><strong id="mgrAvg">0%</strong></div>
+  </section>
+  <section class="panel"><h3>ملخص الموظفين</h3><div class="table-wrap"><table><thead><tr><th>الموظف</th><th>المهام</th><th>تم التواصل</th><th>عملاء مكتسبون</th><th>نسبة الإنجاز</th></tr></thead><tbody id="dashboardBody"></tbody></table></div></section>
 </div>
-
-<div id="toast" class="toast"></div>
-
-<script src="firebase.js"></script>
-<script src="manager.js"></script>
-</body>
-</html>
+<div class="footer">© 2026 نظام أداء الموظفين</div>
+</main>
+</div>
+<script src="firebase.js"></script><script src="manager-common.js"></script><script src="dashboard.js"></script>
+</body></html>

@@ -90,3 +90,33 @@ th{background:#f7f5ff;color:#596174}
   .sidebar{position:static;width:100%}.main{margin-right:0;width:100%}.app{display:block}
   .stats,.grid{grid-template-columns:1fr}.head{flex-direction:column}.target-head{flex-direction:column}
 }
+
+
+.institution-brand{
+  display:flex;align-items:center;gap:10px;min-width:0
+}
+.institution-logo{
+  width:58px;height:58px;border-radius:12px;background:#fff;object-fit:contain;
+  padding:3px;border:1px solid rgba(255,255,255,.14)
+}
+.institution-text{min-width:0}
+.institution-text strong{
+  display:block;color:#fff;font-size:17px;line-height:1.25
+}
+.institution-text span{
+  display:block;color:#d7bd84;font-size:11px;margin-top:4px;letter-spacing:.2px
+}
+.login-institution-logo{
+  width:min(410px,85%);max-height:230px;object-fit:contain;background:#fff;
+  border-radius:18px;padding:16px;margin-bottom:24px;
+  box-shadow:0 14px 35px rgba(0,0,0,.15)
+}
+.topbar-brand{
+  display:flex;align-items:center;gap:10px
+}
+.topbar-brand img{
+  width:40px;height:40px;border-radius:9px;object-fit:contain;background:#fff;padding:2px
+}
+.topbar-brand span{
+  color:#fff;font-weight:700
+}
