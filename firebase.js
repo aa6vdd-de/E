@@ -16,11 +16,14 @@ const accounts = [
   {name:"نورة", aliases:["نورة","نوره"], number:"2000", role:"manager"},
   {name:"أريام", aliases:["أريام","اريام"], number:"1890", role:"employee", department:"التسويق"},
   {name:"طيف", aliases:["طيف"], number:"1818", role:"employee", department:"التسويق"},
-  {name:"دلال", aliases:["دلال"], number:"1018", role:"employee", department:"التسويق"}
+  {name:"دلال", aliases:["دلال"], number:"1018", role:"employee", department:"التسويق"},
+  {name:"أحمد", aliases:["أحمد","احمد"], number:"1970", role:"employee", department:"التصميم"},
+  {name:"يوسف", aliases:["يوسف"], number:"2003", role:"employee", departments:["تحليل البيانات","تصميم المواقع"], department:"تحليل البيانات"}
 ];
 
 const employees = accounts.filter(a => a.role === "employee");
 const departments = ["التسويق","التصميم","تحليل البيانات","تصميم المواقع"];
+const additionalDepartmentMembers = [];
 const monthlyTarget = 5;
 
 function normalizeArabic(v){
@@ -65,8 +68,29 @@ async function ensureProfiles(){
     if(a.role === "employee"){
       updates["profiles/"+a.number+"/monthlyTarget"] = monthlyTarget;
       updates["profiles/"+a.number+"/department"] = a.department || "";
+      if(Array.isArray(a.departments)){
+        updates["profiles/"+a.number+"/departments"] = a.departments;
+      }
     }
   });
   await db.ref().update(updates);
 }
 ensureProfiles().catch(console.error);
+
+function departmentLink(department){
+  return "department-details.html?department=" + encodeURIComponent(department || "");
+}
+
+function employeeInDepartment(employee, department){
+  if(Array.isArray(employee.departments)){
+    return employee.departments.includes(department);
+  }
+  return employee.department === department;
+}
+
+function employeeDepartmentsText(employee){
+  if(Array.isArray(employee.departments) && employee.departments.length){
+    return employee.departments.join(" + ");
+  }
+  return employee.department || "غير محدد";
+}

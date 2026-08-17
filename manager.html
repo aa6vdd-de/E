@@ -25,16 +25,49 @@
 <div class="content">
   <section class="head"><div><h2>الصفحة العامة</h2><p>ملخص مباشر لأداء الفريق.</p></div></section>
   <section class="stats">
-    <div class="card"><small>الموظفون</small><strong id="mgrEmpCount">3</strong></div>
+    <div class="card"><small>الموظفون</small><strong id="mgrEmpCount">5</strong></div>
     <div class="card"><small>إجمالي المهام</small><strong id="mgrTaskCount">0</strong></div>
     <div class="card"><small>تم التواصل</small><strong id="mgrContacted">0</strong></div>
     <div class="card"><small>عملاء مكتسبون</small><strong id="mgrWon">0</strong></div>
     <div class="card"><small>متوسط الإنجاز</small><strong id="mgrAvg">0%</strong></div>
   </section>
-  <section class="panel"><h3>ملخص الموظفين</h3><div class="table-wrap"><table><thead><tr><th>الموظف</th><th>القسم</th><th>المهام</th><th>تم التواصل</th><th>عملاء مكتسبون</th><th>نسبة الإنجاز</th></tr></thead><tbody id="dashboardBody"></tbody></table></div></section>
+  <section class="panel"><h3>ملخص الموظفين</h3><div class="table-wrap"><table><thead><tr><th>الموظف</th><th>القسم</th><th>المهام</th><th>تم التواصل</th><th>عملاء مكتسبون</th><th>نسبة الإنجاز</th><th>تحذير</th></tr></thead><tbody id="dashboardBody"></tbody></table></div></section>
 </div>
 <div class="footer">© 2026 نظام أداء الموظفين</div>
 </main>
 </div>
+
+<div id="managerWarningModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>إرسال تحذير للموظف</h3>
+      <button class="close" onclick="closeManagerWarning()">✕</button>
+    </div>
+    <input type="hidden" id="warningEmployeeNumber">
+    <div class="field">
+      <label>الموظف</label>
+      <input id="warningEmployeeName" disabled>
+    </div>
+    <div class="field">
+      <label>البريد الإلكتروني</label>
+      <input id="warningEmployeeEmail" type="email" placeholder="أضف بريد الموظف لاحقًا">
+    </div>
+    <div class="field">
+      <label>عنوان الرسالة</label>
+      <input id="warningSubject" value="تنبيه بخصوص تأخر التسليم">
+    </div>
+    <div class="field">
+      <label>نص التحذير</label>
+      <textarea id="warningMessage"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="primary" onclick="sendManagerWarning()">فتح البريد</button>
+      <button class="secondary" onclick="saveEmployeeEmail()">حفظ البريد فقط</button>
+      <button class="secondary" onclick="closeManagerWarning()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
 <script src="firebase.js"></script><script src="manager-common.js"></script><script src="dashboard.js"></script>
 </body></html>

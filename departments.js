@@ -1,5 +1,5 @@
 
-const departmentIcons = {
+const departmentIcons={
   "التسويق":"📣",
   "التصميم":"🎨",
   "تحليل البيانات":"📊",
@@ -10,86 +10,44 @@ db.ref("tasks").on("value", snap => {
   const all = snap.val() || {};
 
   departmentsGrid.innerHTML = departments.map(dept => {
-    const members = employees.filter(e => e.department === dept);
+    const actualMembers = employees.filter(e => employeeInDepartment(e, dept));
+    const pendingMembers = additionalDepartmentMembers.filter(e => e.department === dept);
 
-    const memberRows = members.map(e => {
+    const memberRows = actualMembers.map(e => {
       const s = calc(tasksArray(all[e.number]));
-      return { e, s };
+      return {e,s};
     });
 
     const departmentAvg = memberRows.length
-      ? Math.round(memberRows.reduce((sum, row) => sum + row.s.pct, 0) / memberRows.length)
+      ? Math.round(memberRows.reduce((sum,row)=>sum+row.s.pct,0)/memberRows.length)
       : 0;
 
-    const totalTasks = memberRows.reduce((sum, row) => sum + row.s.total, 0);
-    const totalWon = memberRows.reduce((sum, row) => sum + row.s.won, 0);
+    const totalTasks = memberRows.reduce((sum,row)=>sum+row.s.total,0);
+    const totalWon = memberRows.reduce((sum,row)=>sum+row.s.won,0);
+    const totalMembers = actualMembers.length + pendingMembers.length;
 
-    return `
-      <article class="department-card department-card-full">
-        <div class="department-head">
-          <div class="department-title">
-            <div class="department-icon">${departmentIcons[dept] || "🏢"}</div>
-            <div>
-              <h3>${esc(dept)}</h3>
-              <p>${members.length} موظف · ${totalTasks} مهمة · ${totalWon} عميل مكتسب</p>
-            </div>
-          </div>
-
-          <div class="department-score">
-            <small>متوسط الإنجاز</small>
-            <strong>${departmentAvg}%</strong>
+    return `<article class="department-card department-card-full clickable-department" onclick="location.href='${departmentLink(dept)}'">
+      <div class="department-head">
+        <div class="department-title">
+          <div class="department-icon">${departmentIcons[dept]||"🏢"}</div>
+          <div>
+            <h3>${esc(dept)}</h3>
+            <p>${totalMembers} موظف · ${totalTasks} مهمة · ${totalWon} عميل مكتسب</p>
           </div>
         </div>
-
-        <div class="department-progress">
-          <span style="width:${departmentAvg}%"></span>
+        <div class="department-score">
+          <small>متوسط الإنجاز</small>
+          <strong>${departmentAvg}%</strong>
         </div>
+      </div>
 
-        ${
-          memberRows.length
-          ? `<div class="department-employee-list">
-              ${memberRows.map(({e,s}) => `
-                <div class="department-employee-row">
-                  <div class="department-employee-name">
-                    <div class="avatar">${esc(e.name[0])}</div>
-                    <div>
-                      <strong>${esc(e.name)}</strong>
-                      <small>الرقم الوظيفي: ${e.number}</small>
-                    </div>
-                  </div>
+      <div class="department-progress"><span style="width:${departmentAvg}%"></span></div>
 
-                  <div class="employee-metric">
-                    <small>المهام</small>
-                    <strong>${s.total}</strong>
-                  </div>
-
-                  <div class="employee-metric">
-                    <small>تم التواصل</small>
-                    <strong>${s.contacted}</strong>
-                  </div>
-
-                  <div class="employee-metric">
-                    <small>عملاء مكتسبون</small>
-                    <strong>${s.won}</strong>
-                  </div>
-
-                  <div class="employee-achievement">
-                    <div class="employee-achievement-head">
-                      <small>الإنجاز</small>
-                      <strong>${s.pct}%</strong>
-                    </div>
-                    <div class="progress">
-                      <span style="width:${s.pct}%"></span>
-                    </div>
-                  </div>
-                </div>
-              `).join("")}
-            </div>`
-          : `<div class="department-empty">
-              لا يوجد موظفون مضافون في هذا القسم حاليًا.
-            </div>`
-        }
-      </article>
-    `;
+      <div class="department-members">
+        ${actualMembers.map(e=>`<span>${esc(e.name)} <small>#${e.number}</small></span>`).join("")}
+        ${pendingMembers.map(e=>`<span>${esc(e.name)} <small>بيانات الدخول لاحقًا</small></span>`).join("")}
+        ${totalMembers===0?'<span class="muted-member">لا يوجد موظفون مضافون حاليًا</span>':""}
+      </div>
+    </article>`;
   }).join("");
 });

@@ -234,3 +234,11 @@ th{background:#f7f5ff;color:#596174}
 .warning-action:hover{
   background:#fff2cf;
 }
+
+.department-link{color:var(--purple);font-weight:700;text-decoration:none}
+.department-link:hover{text-decoration:underline}
+.clickable-department{cursor:pointer;transition:.18s ease}
+.clickable-department:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(20,35,60,.09)}
+.status-pill{display:inline-flex;padding:6px 9px;border-radius:999px;font-size:12px;font-weight:700}
+.active-status{background:var(--greenbg);color:var(--green)}
+.pending-status{background:var(--orangebg);color:var(--orange)}
