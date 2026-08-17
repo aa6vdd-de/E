@@ -14,12 +14,13 @@ const db = firebase.database();
 
 const accounts = [
   {name:"نورة", aliases:["نورة","نوره"], number:"2000", role:"manager"},
-  {name:"أريام", aliases:["أريام","اريام"], number:"1890", role:"employee"},
-  {name:"طيف", aliases:["طيف"], number:"1818", role:"employee"},
-  {name:"أحمد", aliases:["أحمد","احمد"], number:"1018", role:"employee"}
+  {name:"أريام", aliases:["أريام","اريام"], number:"1890", role:"employee", department:"التسويق"},
+  {name:"طيف", aliases:["طيف"], number:"1818", role:"employee", department:"التسويق"},
+  {name:"دلال", aliases:["دلال"], number:"1018", role:"employee", department:"التسويق"}
 ];
 
 const employees = accounts.filter(a => a.role === "employee");
+const departments = ["التسويق","التصميم","تحليل البيانات","تصميم المواقع"];
 const monthlyTarget = 5;
 
 function normalizeArabic(v){
@@ -61,7 +62,10 @@ async function ensureProfiles(){
     updates["profiles/"+a.number+"/name"] = a.name;
     updates["profiles/"+a.number+"/role"] = a.role;
     updates["profiles/"+a.number+"/employeeNumber"] = a.number;
-    if(a.role === "employee") updates["profiles/"+a.number+"/monthlyTarget"] = monthlyTarget;
+    if(a.role === "employee"){
+      updates["profiles/"+a.number+"/monthlyTarget"] = monthlyTarget;
+      updates["profiles/"+a.number+"/department"] = a.department || "";
+    }
   });
   await db.ref().update(updates);
 }

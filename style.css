@@ -90,3 +90,10 @@ th{background:#f7f5ff;color:#596174}
   .sidebar{position:static;width:100%}.main{margin-right:0;width:100%}.app{display:block}
   .stats,.grid{grid-template-columns:1fr}.head{flex-direction:column}.target-head{flex-direction:column}
 }
+
+.department-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.department-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;gap:16px;align-items:flex-start;box-shadow:0 5px 20px rgba(20,35,60,.05)}
+.department-icon{width:54px;height:54px;border-radius:14px;background:#f0edff;display:grid;place-items:center;font-size:26px;flex:0 0 auto}
+.department-info{flex:1}.department-info h3{margin:2px 0 4px;font-size:19px}.department-info p{margin:0 0 14px;color:var(--muted)}
+.department-members{display:flex;flex-wrap:wrap;gap:8px}.department-members span{background:#f7f8fb;border:1px solid var(--line);border-radius:999px;padding:7px 10px;font-size:13px}.department-members small{color:var(--muted)}.muted-member{color:var(--muted)!important}
+@media(max-width:800px){.department-grid{grid-template-columns:1fr}}

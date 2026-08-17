@@ -42,6 +42,7 @@ function renderEmployeeTasks(tasks){
       <td>${i+1}</td>
       <td><strong>${esc(t.clientName)}</strong></td>
       <td>${esc(t.phone)}</td>
+      <td>${t.deadline ? esc(t.deadline) : "—"}</td>
       <td>
         <select class="status-select" id="status-${t.id}">
           ${["جديد","تم التواصل","تم التحويل إلى عميل","مؤجل","لا يرد"]

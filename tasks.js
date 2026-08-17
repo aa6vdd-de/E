@@ -7,10 +7,11 @@ function normalizeRow(row){
  return {clientName:String(name||"").trim(),phone:String(phone||"").trim()};
 }
 async function addSingleTask(){
- const employeeNumber=singleEmployee.value,clientName=singleName.value.trim(),phone=singlePhone.value.trim(),note=singleNote.value.trim();
+ const employeeNumber=singleEmployee.value,clientName=singleName.value.trim(),phone=singlePhone.value.trim(),note=singleNote.value.trim(),deadline=singleDeadline.value;
  if(!clientName||!validPhone(phone)){alert("أدخل اسم العميل ورقم تواصل صحيح");return}
- await db.ref("tasks/"+employeeNumber).push().set({clientName,phone,status:"جديد",note,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
- singleName.value="";singlePhone.value="";singleNote.value="";showToast("تم إرسال المهمة");
+ if(!deadline){alert("حدد تاريخ انتهاء المهمة");return}
+ await db.ref("tasks/"+employeeNumber).push().set({clientName,phone,status:"جديد",note,deadline,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
+ singleName.value="";singlePhone.value="";singleNote.value="";singleDeadline.value="";showToast("تم إرسال المهمة");
 }
 async function readSelectedFile(){
  const f=bulkFile.files[0]; if(!f)return [];
@@ -30,8 +31,8 @@ async function previewBulk(){
 }
 async function importBulk(){
  if(!parsedRows.length) await previewBulk(); if(!parsedRows.length)return;
- const employeeNumber=bulkEmployee.value; const base=db.ref("tasks/"+employeeNumber); const updates={};
- parsedRows.forEach(r=>{const key=base.push().key;updates[key]={clientName:r.clientName,phone:r.phone,status:"جديد",note:"",createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"}});
- await base.update(updates); const count=parsedRows.length; parsedRows=[]; bulkFile.value="";bulkPaste.value="";importPreview.textContent="لم يتم تحميل بيانات بعد.";showToast(`تم استيراد ${count} عميل`);
+ const employeeNumber=bulkEmployee.value; const deadline=bulkDeadline.value; if(!deadline){alert("حدد تاريخ انتهاء المهام المستوردة");return} const base=db.ref("tasks/"+employeeNumber); const updates={};
+ parsedRows.forEach(r=>{const key=base.push().key;updates[key]={clientName:r.clientName,phone:r.phone,status:"جديد",note:"",deadline,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"}});
+ await base.update(updates); const count=parsedRows.length; parsedRows=[]; bulkFile.value="";bulkPaste.value="";bulkDeadline.value="";importPreview.textContent="لم يتم تحميل بيانات بعد.";showToast(`تم استيراد ${count} عميل`);
 }
 db.ref("tasks").on("value",snap=>{const all=snap.val()||{};taskCounts.innerHTML=employees.map(e=>{const s=calc(tasksArray(all[e.number]));return `<div class="card"><small>${esc(e.name)}</small><strong>${s.total}</strong><small>مهمة</small></div>`}).join("")});
