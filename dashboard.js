@@ -1,22 +1,72 @@
-db.ref("tasks").on("value", snap => {
-  const all = snap.val() || {};
-  let totalTasks=0,totalContacted=0,totalWon=0,totalPct=0;
-  document.getElementById("dashboardBody").innerHTML = employees.map(e=>{
-    const s=calc(tasksArray(all[e.number]));
-    totalTasks+=s.total; totalContacted+=s.contacted; totalWon+=s.won; totalPct+=s.pct;
-    return `<tr>
-      <td><div class="employee-name"><div class="avatar">${esc(e.name[0])}</div><strong>${esc(e.name)}</strong></div></td>
-      <td><a class="department-link" href="${departmentLink(e.department)}">${esc(employeeDepartmentsText(e))}</a></td>
-      <td>${s.total}</td>
-      <td>${s.contacted}</td>
-      <td>${s.won}</td>
-      <td><strong>${s.pct}%</strong><div class="progress"><span style="width:${s.pct}%"></span></div></td>
-      <td><button class="action warning-action" onclick="openManagerWarning('${e.number}')">✉️ تحذير</button></td>
-    </tr>`;
-  }).join("");
-  mgrEmpCount.textContent=employees.length; mgrTaskCount.textContent=totalTasks; mgrContacted.textContent=totalContacted; mgrWon.textContent=totalWon; mgrAvg.textContent=Math.round(totalPct/employees.length||0)+"%";
-});
 
+function renderDashboardEmployees(allTasks = {}){
+  let totalTasks = 0;
+  let totalContacted = 0;
+  let totalWon = 0;
+  let totalPct = 0;
+
+  const container = document.getElementById("dashboardEmployees");
+  if(!container) return;
+
+  container.innerHTML = employees.map(e => {
+    const s = calc(tasksArray(allTasks[e.number]));
+    totalTasks += s.total;
+    totalContacted += s.contacted;
+    totalWon += s.won;
+    totalPct += s.pct;
+
+    return `
+      <article class="dashboard-employee-card">
+        <div class="dashboard-employee-top">
+          <div class="employee-name">
+            <div class="avatar">${esc(e.name[0])}</div>
+            <div>
+              <strong>${esc(e.name)}</strong>
+              <small>#${e.number}</small>
+            </div>
+          </div>
+          <button class="action warning-action" onclick="openManagerWarning('${e.number}')">✉️ تحذير</button>
+        </div>
+
+        <a class="department-link dashboard-department"
+           href="${departmentLink(e.department)}">
+          ${esc(employeeDepartmentsText(e))}
+        </a>
+
+        <div class="dashboard-mini-stats">
+          <div><small>المهام</small><strong>${s.total}</strong></div>
+          <div><small>تم التواصل</small><strong>${s.contacted}</strong></div>
+          <div><small>عملاء مكتسبون</small><strong>${s.won}</strong></div>
+        </div>
+
+        <div class="dashboard-performance">
+          <div><small>نسبة الإنجاز</small><strong>${s.pct}%</strong></div>
+          <div class="progress"><span style="width:${s.pct}%"></span></div>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  document.getElementById("mgrEmpCount").textContent = employees.length;
+  document.getElementById("mgrTaskCount").textContent = totalTasks;
+  document.getElementById("mgrContacted").textContent = totalContacted;
+  document.getElementById("mgrWon").textContent = totalWon;
+  document.getElementById("mgrAvg").textContent =
+    Math.round(totalPct / employees.length || 0) + "%";
+}
+
+/* Render the names immediately, even before Firebase responds. */
+renderDashboardEmployees({});
+
+/* Then update the numbers in realtime. */
+db.ref("tasks").on(
+  "value",
+  snap => renderDashboardEmployees(snap.val() || {}),
+  error => {
+    console.error("Firebase tasks read failed:", error);
+    showToast("تعذر تحديث بيانات الأداء، لكن الموظفين ظاهرون.");
+  }
+);
 
 function openManagerWarning(employeeNumber){
   const emp = employees.find(e => e.number === String(employeeNumber));
@@ -47,10 +97,12 @@ function closeManagerWarning(){
 function saveEmployeeEmail(){
   const num = warningEmployeeNumber.value;
   const email = warningEmployeeEmail.value.trim();
+
   if(!email){
     alert("أدخل البريد الإلكتروني أولًا");
     return;
   }
+
   localStorage.setItem("employeeEmail_" + num, email);
   showToast("تم حفظ بريد الموظف");
 }

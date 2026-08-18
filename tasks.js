@@ -1,4 +1,29 @@
 let parsedRows=[];
+
+function normalizePhone(v){
+  let digits = String(v || "").replace(/\D/g, "");
+  if(digits.startsWith("00966")) digits = digits.slice(2);
+  if(digits.startsWith("966")) return digits;
+  if(digits.startsWith("05")) return "966" + digits.slice(1);
+  if(digits.startsWith("5") && digits.length === 9) return "966" + digits;
+  return digits;
+}
+
+async function getExistingPhoneSet(){
+  const snap = await db.ref("tasks").once("value");
+  const all = snap.val() || {};
+  const set = new Set();
+
+  Object.values(all).forEach(employeeTasks => {
+    tasksArray(employeeTasks).forEach(task => {
+      const key = normalizePhone(task.phone);
+      if(key) set.add(key);
+    });
+  });
+
+  return set;
+}
+
 function validPhone(v){return String(v||"").replace(/\D/g,"").length>=7}
 function normalizeRow(row){
  const obj={}; Object.keys(row||{}).forEach(k=>obj[String(k).trim().toLowerCase()]=row[k]);
@@ -10,6 +35,14 @@ async function addSingleTask(){
  const employeeNumber=singleEmployee.value,clientName=singleName.value.trim(),phone=singlePhone.value.trim(),note=singleNote.value.trim(),deadline=singleDeadline.value;
  if(!clientName||!validPhone(phone)){alert("أدخل اسم العميل ورقم تواصل صحيح");return}
  if(!deadline){alert("حدد تاريخ انتهاء المهمة");return}
+
+ const existingPhones = await getExistingPhoneSet();
+ const phoneKey = normalizePhone(phone);
+ if(existingPhones.has(phoneKey)){
+   alert("هذا الرقم موجود مسبقًا في النظام ولن تتم إضافته مرة ثانية.");
+   return;
+ }
+
  await db.ref("tasks/"+employeeNumber).push().set({clientName,phone,status:"جديد",note,deadline,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
  singleName.value="";singlePhone.value="";singleNote.value="";singleDeadline.value="";showToast("تم إرسال المهمة");
 }
@@ -25,15 +58,58 @@ function readPaste(){
 }
 async function previewBulk(){
  try{parsedRows=[...(await readSelectedFile()),...readPaste()];
- const uniq=[];const seen=new Set(); for(const r of parsedRows){const k=r.phone.replace(/\D/g,"");if(!seen.has(k)){seen.add(k);uniq.push(r)}} parsedRows=uniq;
+ const uniq=[];const seen=new Set(); for(const r of parsedRows){const k=normalizePhone(r.phone);if(!seen.has(k)){seen.add(k);uniq.push(r)}} parsedRows=uniq;
  importPreview.innerHTML=parsedRows.length?`<strong>جاهز للاستيراد: ${parsedRows.length} عميل</strong><div style="margin-top:8px;color:var(--muted)">${parsedRows.slice(0,5).map(r=>esc(r.clientName)+" — "+esc(r.phone)).join("<br>")}${parsedRows.length>5?"<br>...":""}</div>`:"لم أجد صفوفًا صالحة. تأكد أن الملف يحتوي الاسم والرقم.";
  }catch(e){console.error(e);alert("تعذر قراءة الملف. تأكد أنه Excel أو CSV صحيح.")}
 }
 async function importBulk(){
- if(!parsedRows.length) await previewBulk(); if(!parsedRows.length)return;
- const employeeNumber=bulkEmployee.value; const deadline=bulkDeadline.value; if(!deadline){alert("حدد تاريخ انتهاء المهام المستوردة");return} const base=db.ref("tasks/"+employeeNumber); const updates={};
- parsedRows.forEach(r=>{const key=base.push().key;updates[key]={clientName:r.clientName,phone:r.phone,status:"جديد",note:"",deadline,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"}});
- await base.update(updates); const count=parsedRows.length; parsedRows=[]; bulkFile.value="";bulkPaste.value="";bulkDeadline.value="";importPreview.textContent="لم يتم تحميل بيانات بعد.";showToast(`تم استيراد ${count} عميل`);
+ if(!parsedRows.length) await previewBulk();
+ if(!parsedRows.length)return;
+
+ const employeeNumber=bulkEmployee.value;
+ const deadline=bulkDeadline.value;
+ if(!deadline){alert("حدد تاريخ انتهاء المهام المستوردة");return}
+
+ const existingPhones = await getExistingPhoneSet();
+ const uniqueRows = [];
+ const skipped = [];
+ const batchSeen = new Set();
+
+ parsedRows.forEach(r => {
+   const key = normalizePhone(r.phone);
+   if(!key || existingPhones.has(key) || batchSeen.has(key)){
+     skipped.push(r);
+     return;
+   }
+   batchSeen.add(key);
+   uniqueRows.push(r);
+ });
+
+ if(!uniqueRows.length){
+   alert(`لم تتم إضافة أي رقم. جميع الأرقام (${skipped.length}) موجودة مسبقًا أو مكررة.`);
+   return;
+ }
+
+ const base=db.ref("tasks/"+employeeNumber);
+ const updates={};
+ uniqueRows.forEach(r=>{
+   const key=base.push().key;
+   updates[key]={clientName:r.clientName,phone:r.phone,status:"جديد",note:"",deadline,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"};
+ });
+
+ await base.update(updates);
+
+ const count=uniqueRows.length;
+ const skippedCount=skipped.length;
+ parsedRows=[];
+ bulkFile.value="";
+ bulkPaste.value="";
+ bulkDeadline.value="";
+ importPreview.textContent="لم يتم تحميل بيانات بعد.";
+
+ showToast(skippedCount
+   ? `تم استيراد ${count} عميل وتجاهل ${skippedCount} رقم مكرر`
+   : `تم استيراد ${count} عميل`);
 }
 db.ref("tasks").on("value",snap=>{const all=snap.val()||{};taskCounts.innerHTML=employees.map(e=>{const s=calc(tasksArray(all[e.number]));return `<div class="card"><small>${esc(e.name)}</small><strong>${s.total}</strong><small>مهمة</small></div>`}).join("")});
 

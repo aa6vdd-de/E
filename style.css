@@ -242,3 +242,111 @@ th{background:#f7f5ff;color:#596174}
 .status-pill{display:inline-flex;padding:6px 9px;border-radius:999px;font-size:12px;font-weight:700}
 .active-status{background:var(--greenbg);color:var(--green)}
 .pending-status{background:var(--orangebg);color:var(--orange)}
+
+
+/* ===== Separated manager dashboard ===== */
+.dashboard-section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+}
+.dashboard-section-head h3{margin:0 0 5px}
+.dashboard-section-head p{margin:0;color:var(--muted);font-size:13px}
+
+.dashboard-employee-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.dashboard-employee-card{
+  border:1px solid var(--line);
+  background:#fbfcfe;
+  border-radius:14px;
+  padding:16px;
+}
+.dashboard-employee-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.dashboard-employee-top .employee-name small{
+  display:block;
+  color:var(--muted);
+  margin-top:3px;
+}
+.dashboard-department{
+  display:inline-block;
+  margin:13px 0;
+  padding:6px 9px;
+  border-radius:8px;
+  background:#f0edff;
+}
+.dashboard-mini-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.dashboard-mini-stats>div{
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+}
+.dashboard-mini-stats small,
+.dashboard-performance small{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+}
+.dashboard-mini-stats strong{
+  display:block;
+  font-size:18px;
+  margin-top:3px;
+}
+.dashboard-performance{
+  margin-top:13px;
+}
+.dashboard-performance>div:first-child{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.dashboard-quick-links{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+.dashboard-link-card{
+  color:var(--text);
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  box-shadow:0 4px 18px rgba(20,35,60,.04);
+}
+.dashboard-link-card:hover{
+  border-color:#cfc6ff;
+  transform:translateY(-1px);
+}
+.dashboard-link-card>span{font-size:28px}
+.dashboard-link-card strong{display:block;font-size:16px}
+.dashboard-link-card small{display:block;color:var(--muted);margin-top:4px}
+@media(max-width:900px){
+  .dashboard-employee-grid{grid-template-columns:1fr}
+  .dashboard-quick-links{grid-template-columns:1fr}
+}
+
+/* Phone numbers must stay left-to-right inside the Arabic RTL interface. */
+.phone-number{
+  direction:ltr;
+  unicode-bidi:isolate;
+  display:inline-block;
+  white-space:nowrap;
+  text-align:left;
+  font-variant-numeric:tabular-nums;
+}

@@ -41,7 +41,7 @@ function renderEmployeeTasks(tasks){
     <tr>
       <td>${i+1}</td>
       <td><strong>${esc(t.clientName)}</strong></td>
-      <td>${esc(t.phone)}</td>
+      <td><span class="phone-number" dir="ltr">${esc(t.phone)}</span></td>
       <td>${t.deadline ? esc(t.deadline) : "—"}</td>
       <td>
         <select class="status-select" id="status-${t.id}">

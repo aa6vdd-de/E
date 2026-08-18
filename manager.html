@@ -23,7 +23,13 @@
 <main class="main">
 <header class="topbar"><strong>نظام أداء الموظفين</strong><span>المدير: نورة</span></header>
 <div class="content">
-  <section class="head"><div><h2>الصفحة العامة</h2><p>ملخص مباشر لأداء الفريق.</p></div></section>
+  <section class="head">
+    <div>
+      <h2>الصفحة العامة</h2>
+      <p>نظرة سريعة على الفريق. التفاصيل الكاملة موجودة في الصفحات المخصصة.</p>
+    </div>
+  </section>
+
   <section class="stats">
     <div class="card"><small>الموظفون</small><strong id="mgrEmpCount">5</strong></div>
     <div class="card"><small>إجمالي المهام</small><strong id="mgrTaskCount">0</strong></div>
@@ -31,7 +37,33 @@
     <div class="card"><small>عملاء مكتسبون</small><strong id="mgrWon">0</strong></div>
     <div class="card"><small>متوسط الإنجاز</small><strong id="mgrAvg">0%</strong></div>
   </section>
-  <section class="panel"><h3>ملخص الموظفين</h3><div class="table-wrap"><table><thead><tr><th>الموظف</th><th>القسم</th><th>المهام</th><th>تم التواصل</th><th>عملاء مكتسبون</th><th>نسبة الإنجاز</th><th>تحذير</th></tr></thead><tbody id="dashboardBody"></tbody></table></div></section>
+
+  <section class="panel">
+    <div class="panel-head dashboard-section-head">
+      <div>
+        <h3>ملخص الموظفين</h3>
+        <p>الأسماء تظهر مباشرة، وبيانات الأداء تتحدث من Firebase.</p>
+      </div>
+      <a class="action" href="employees.html">عرض تفاصيل الموظفين ←</a>
+    </div>
+
+    <div id="dashboardEmployees" class="dashboard-employee-grid"></div>
+  </section>
+
+  <section class="dashboard-quick-links">
+    <a class="dashboard-link-card" href="departments.html">
+      <span>🏢</span>
+      <div><strong>الأقسام</strong><small>تفاصيل كل قسم والموظفين</small></div>
+    </a>
+    <a class="dashboard-link-card" href="tasks.html">
+      <span>📋</span>
+      <div><strong>المهام</strong><small>إضافة ومتابعة المهام</small></div>
+    </a>
+    <a class="dashboard-link-card" href="reports.html">
+      <span>📈</span>
+      <div><strong>التقارير</strong><small>مقارنة الأداء والإنجاز</small></div>
+    </a>
+  </section>
 </div>
 <div class="footer">© 2026 نظام أداء الموظفين</div>
 </main>
