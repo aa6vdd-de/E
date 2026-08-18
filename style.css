@@ -352,3 +352,6 @@ th{background:#f7f5ff;color:#596174}
 }
 
 .task-description{max-width:340px;white-space:normal;line-height:1.7;color:var(--text)}
+
+.delete-action{border:1px solid #ef4444;background:#fff1f2;color:#b91c1c}
+.delete-action:hover{background:#ffe4e6}

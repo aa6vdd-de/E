@@ -18,7 +18,8 @@ const accounts = [
   {name:"طيف", aliases:["طيف"], number:"1818", role:"employee", department:"التسويق"},
   {name:"دلال", aliases:["دلال"], number:"1018", role:"employee", department:"التسويق"},
   {name:"أحمد", aliases:["أحمد","احمد"], number:"1970", role:"employee", department:"التصميم"},
-  {name:"يوسف", aliases:["يوسف"], number:"2003", role:"employee", departments:["تحليل البيانات","تصميم المواقع"], department:"تحليل البيانات"}
+  {name:"يوسف", aliases:["يوسف"], number:"2003", role:"employee", department:"تصميم المواقع"},
+  {name:"يوسف", aliases:["يوسف"], number:"2004", role:"employee", department:"تحليل البيانات"}
 ];
 
 const employees = accounts.filter(a => a.role === "employee");

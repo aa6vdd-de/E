@@ -62,7 +62,8 @@ async function addProjectTask(){
   const employeeNumber=projectEmployee.value,title=projectTitle.value.trim(),clientName=projectClientName.value.trim(),clientPhone=projectClientPhone.value.trim(),deadline=projectDeadline.value,department=projectDepartment.value,description=projectDescription.value.trim();
   if(!title||!clientName||!clientPhone||!deadline||!description){alert("أكمل بيانات المهمة والعميل والتفاصيل وتاريخ التسليم.");return}
   if(employeeNumber==="1970"&&department!=="التصميم"){alert("أحمد تابع لقسم التصميم.");return}
-  if(employeeNumber==="2003"&&!["تحليل البيانات","تصميم المواقع"].includes(department)){alert("يوسف تابع لتحليل البيانات وتصميم المواقع.");return}
+  if(employeeNumber==="2003"&&department!=="تصميم المواقع"){alert("يوسف 2003 تابع لتصميم المواقع.");return}
+  if(employeeNumber==="2004"&&department!=="تحليل البيانات"){alert("يوسف 2004 تابع لتحليل البيانات.");return}
   await db.ref("projectTasks/"+employeeNumber).push().set({title,clientName,clientPhone,deadline,department,description,status:"قيد التنفيذ",workType:"project",createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
   projectTitle.value="";projectClientName.value="";projectClientPhone.value="";projectDeadline.value="";projectDescription.value="";showToast("تم إرسال مهمة المشروع");
 }
@@ -84,7 +85,20 @@ function renderAll(){
     });
   });
   overdueEmpty.classList.toggle("hidden",rows.length>0);overdueWrap.classList.toggle("hidden",rows.length===0);
-  overdueBody.innerHTML=rows.map(r=>`<tr><td><strong>${esc(r.e.name)}</strong></td><td>${r.type}</td><td>${esc(r.label||"—")}</td><td>${esc(r.date||"—")}</td><td>${esc(r.status||"—")}</td><td><button class="action warning-action" onclick="openEmailModal('${r.e.number}','${r.id}','${r.source}')">✉️ إرسال تنبيه</button></td></tr>`).join("");
+  const allRows=[];
+  employees.forEach(e=>{
+    tasksArray(marketingAll[e.number]).forEach(t=>allRows.push({
+      e,type:"تواصل",label:t.clientName,date:t.deadline,status:t.status,id:t.id,source:"tasks",department:"التسويق"
+    }));
+    projectTasksArray(projectAll[e.number]).forEach(t=>allRows.push({
+      e,type:"مشروع",label:t.title,date:t.deadline,status:t.status,id:t.id,source:"projectTasks",department:t.department||employeeDepartmentsText(e)
+    }));
+  });
+  managerAllTasksEmpty.classList.toggle("hidden",allRows.length>0);
+  managerAllTasksWrap.classList.toggle("hidden",allRows.length===0);
+  managerAllTasksBody.innerHTML=allRows.map(r=>`<tr><td><strong>${esc(r.e.name)}</strong></td><td>${esc(r.department||"—")}</td><td>${r.type}</td><td>${esc(r.label||"—")}</td><td>${esc(r.date||"—")}</td><td>${esc(r.status||"—")}</td><td><button class="action delete-action" onclick="deleteTask('${r.e.number}','${r.id}','${r.source}')">🗑️ حذف</button></td></tr>`).join("");
+
+  overdueBody.innerHTML=rows.map(r=>`<tr><td><strong>${esc(r.e.name)}</strong></td><td>${r.type}</td><td>${esc(r.label||"—")}</td><td>${esc(r.date||"—")}</td><td>${esc(r.status||"—")}</td><td><button class="action warning-action" onclick="openEmailModal('${r.e.number}','${r.id}','${r.source}')">✉️ إرسال تنبيه</button> <button class="action delete-action" onclick="deleteTask('${r.e.number}','${r.id}','${r.source}')">🗑️ حذف</button></td></tr>`).join("");
 }
 db.ref("tasks").on("value",s=>{marketingAll=s.val()||{};renderAll()});
 db.ref("projectTasks").on("value",s=>{projectAll=s.val()||{};renderAll()});
@@ -114,4 +128,15 @@ function sendWarningEmail(){
   localStorage.setItem("employeeEmail_"+emailEmployeeNumber.value,email);
   location.href="mailto:"+encodeURIComponent(email)+"?subject="+encodeURIComponent(emailSubject.value.trim())+"&body="+encodeURIComponent(emailMessage.value.trim());
   closeEmailModal();
+}
+
+async function deleteTask(employeeNumber, taskId, source){
+  if(!confirm("هل أنت متأكد من حذف هذه المهمة؟")) return;
+  try{
+    await db.ref(source+"/"+employeeNumber+"/"+taskId).remove();
+    showToast("تم حذف المهمة");
+  }catch(err){
+    console.error(err);
+    alert("تعذر حذف المهمة. حاول مرة أخرى.");
+  }
 }
