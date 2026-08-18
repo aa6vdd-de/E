@@ -94,3 +94,19 @@ function employeeDepartmentsText(employee){
   }
   return employee.department || "غير محدد";
 }
+
+function isMarketingEmployee(employee){
+  return employeeInDepartment(employee, "التسويق");
+}
+function projectTasksArray(value){
+  if(!value) return [];
+  return Object.entries(value).map(([id,t]) => ({id,...t}));
+}
+function projectStats(tasks){
+  const total=tasks.length;
+  const completed=tasks.filter(t=>t.status==="مكتملة").length;
+  const inProgress=tasks.filter(t=>t.status==="قيد التنفيذ").length;
+  const overdue=tasks.filter(t=>t.status==="متأخرة").length;
+  const pct=total?Math.round(completed/total*100):0;
+  return {total,completed,inProgress,overdue,pct};
+}

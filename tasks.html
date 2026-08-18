@@ -1,40 +1,55 @@
 <!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>المهام</title><link rel="stylesheet" href="style.css"><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script></head><body>
 <div class="app"><aside class="sidebar"><div class="brand"><div class="mini-logo">📊</div><div><h1>لوحة المدير</h1><p>إدارة الفريق</p></div></div><nav class="menu"><a href="manager.html">⌂ الصفحة العامة</a><a href="employees.html">👥 الموظفون</a><a href="departments.html">🏢 الأقسام</a><a class="active" href="tasks.html">📋 المهام</a><a href="reports.html">📈 التقارير</a><button onclick="managerLogout()">↪ تسجيل خروج</button></nav><div class="user-box"><strong>نورة</strong><small>مدير النظام</small><small>الرقم الوظيفي: 2000</small></div></aside>
 <main class="main"><header class="topbar"><strong>نظام أداء الموظفين</strong><span>المهام</span></header><div class="content">
-<section class="head"><div><h2>إرسال مهام التواصل</h2><p>أضف عميلًا واحدًا أو ارفع مئات العملاء دفعة واحدة.</p></div></section>
-<section class="panel"><h3>إضافة عميل واحد</h3><div class="grid"><div class="field"><label>الموظف</label><select id="singleEmployee"><option value="1890">أريام</option><option value="1818">طيف</option><option value="1018">دلال</option><option value="1970">أحمد</option><option value="2003">يوسف</option></select></div><div class="field"><label>اسم العميل</label><input id="singleName"></div><div class="field"><label>رقم التواصل</label><input id="singlePhone"></div><div class="field"><label>ملاحظة</label><input id="singleNote"></div><div class="field"><label>تاريخ انتهاء المهمة</label><input id="singleDeadline" type="date"></div></div><button class="primary" onclick="addSingleTask()">إرسال المهمة</button></section>
-<section class="panel"><h3>استيراد جماعي للعملاء</h3><p style="color:var(--muted)">ارفع ملف Excel أو CSV. الأعمدة المفضلة: <b>الاسم</b> و<b>رقم التواصل</b>. ويمكن أيضًا استخدام Name / Phone.</p>
-<div class="grid"><div class="field"><label>إرسال القائمة إلى</label><select id="bulkEmployee"><option value="1890">أريام</option><option value="1818">طيف</option><option value="1018">دلال</option><option value="1970">أحمد</option><option value="2003">يوسف</option></select></div><div class="field"><label>ملف Excel / CSV</label><input id="bulkFile" type="file" accept=".xlsx,.xls,.csv"></div><div class="field"><label>تاريخ انتهاء المهام المستوردة</label><input id="bulkDeadline" type="date"></div></div>
-<div class="field"><label>أو الصق البيانات مباشرة — كل سطر: الاسم، الرقم</label><textarea id="bulkPaste" placeholder="خالد محمد,0501234567&#10;سارة أحمد,0551234567"></textarea></div>
-<div id="importPreview" class="empty" style="padding:18px">لم يتم تحميل بيانات بعد.</div>
-<div class="modal-actions"><button class="secondary" onclick="previewBulk()">معاينة</button><button class="primary" onclick="importBulk()">استيراد وإرسال</button></div></section>
+<section class="head"><div><h2>إدارة المهام</h2><p>التسويق له مهام تواصل، وباقي الأقسام لها مهام مشاريع وتسليمات.</p></div></section>
 
 <section class="panel">
-  <div class="panel-head">
-    <div>
-      <h3>⏰ المهام المتأخرة</h3>
-      <p style="color:var(--muted);margin:5px 0 0">المهام التي انتهى تاريخها ولم يتم تحويلها إلى عميل أو إكمالها.</p>
-    </div>
-  </div>
-  <div id="overdueEmpty" class="empty" style="padding:28px">لا توجد مهام متأخرة حاليًا 🎉</div>
-  <div id="overdueWrap" class="table-wrap hidden">
-    <table>
-      <thead>
-        <tr>
-          <th>الموظف</th>
-          <th>العميل</th>
-          <th>تاريخ الانتهاء</th>
-          <th>الحالة</th>
-          <th>الإجراء</th>
-        </tr>
-      </thead>
-      <tbody id="overdueBody"></tbody>
-    </table>
-  </div>
+<h3>📞 مهام قسم التسويق</h3>
+<div class="grid">
+<div class="field"><label>الموظف</label><select id="singleEmployee"><option value="1890">أريام</option><option value="1818">طيف</option><option value="1018">دلال</option></select></div>
+<div class="field"><label>اسم العميل</label><input id="singleName"></div>
+<div class="field"><label>رقم التواصل</label><input id="singlePhone"></div>
+<div class="field"><label>ملاحظة</label><input id="singleNote"></div>
+<div class="field"><label>تاريخ انتهاء المهمة</label><input id="singleDeadline" type="date"></div>
+</div>
+<button class="primary" onclick="addSingleTask()">إرسال مهمة التواصل</button>
+</section>
+
+<section class="panel">
+<h3>📥 استيراد جماعي للتسويق</h3>
+<div class="grid">
+<div class="field"><label>إرسال القائمة إلى</label><select id="bulkEmployee"><option value="1890">أريام</option><option value="1818">طيف</option><option value="1018">دلال</option></select></div>
+<div class="field"><label>ملف Excel / CSV</label><input id="bulkFile" type="file" accept=".xlsx,.xls,.csv"></div>
+<div class="field"><label>تاريخ انتهاء المهام</label><input id="bulkDeadline" type="date"></div>
+</div>
+<div class="field"><label>أو الصق البيانات — كل سطر: الاسم، الرقم</label><textarea id="bulkPaste"></textarea></div>
+<div id="importPreview" class="empty" style="padding:18px">لم يتم تحميل بيانات بعد.</div>
+<div class="modal-actions"><button class="secondary" onclick="previewBulk()">معاينة</button><button class="primary" onclick="importBulk()">استيراد وإرسال</button></div>
+</section>
+
+<section class="panel">
+<h3>🧩 مهام التصميم وتحليل البيانات وتصميم المواقع</h3>
+<div class="grid">
+<div class="field"><label>الموظف</label><select id="projectEmployee"><option value="1970">أحمد — التصميم</option><option value="2003">يوسف — تحليل البيانات + تصميم المواقع</option></select></div>
+<div class="field"><label>اسم المشروع / المهمة</label><input id="projectTitle"></div>
+<div class="field"><label>اسم العميل</label><input id="projectClientName"></div>
+<div class="field"><label>رقم التواصل للعميل</label><input id="projectClientPhone" dir="ltr"></div>
+<div class="field"><label>تاريخ التسليم</label><input id="projectDeadline" type="date"></div>
+<div class="field"><label>القسم المرتبط بالمهمة</label><select id="projectDepartment"><option>التصميم</option><option>تحليل البيانات</option><option>تصميم المواقع</option></select></div>
+</div>
+<div class="field"><label>تفاصيل المهمة والمواصفات</label><textarea id="projectDescription"></textarea></div>
+<button class="primary" onclick="addProjectTask()">إرسال مهمة المشروع</button>
+</section>
+
+<section class="panel">
+<h3>⏰ المهام المتأخرة</h3>
+<div id="overdueEmpty" class="empty" style="padding:28px">لا توجد مهام متأخرة حاليًا 🎉</div>
+<div id="overdueWrap" class="table-wrap hidden"><table><thead><tr><th>الموظف</th><th>نوع المهمة</th><th>المهمة / العميل</th><th>تاريخ الانتهاء</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="overdueBody"></tbody></table></div>
 </section>
 
 <section class="panel"><h3>أعداد المهام الحالية</h3><div id="taskCounts" class="stats" style="margin-bottom:0"></div></section>
-</div><div class="footer">© 2026 نظام أداء الموظفين</div></main></div>
+</div>
+<div class="footer">© 2026 نظام أداء الموظفين</div></main></div>
 
 <div id="emailModal" class="modal">
   <div class="modal-box">

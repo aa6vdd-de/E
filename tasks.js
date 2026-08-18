@@ -1,220 +1,117 @@
+
 let parsedRows=[];
-
-function normalizePhone(v){
-  let digits = String(v || "").replace(/\D/g, "");
-  if(digits.startsWith("00966")) digits = digits.slice(2);
-  if(digits.startsWith("966")) return digits;
-  if(digits.startsWith("05")) return "966" + digits.slice(1);
-  if(digits.startsWith("5") && digits.length === 9) return "966" + digits;
-  return digits;
-}
-
-async function getExistingPhoneSet(){
-  const snap = await db.ref("tasks").once("value");
-  const all = snap.val() || {};
-  const set = new Set();
-
-  Object.values(all).forEach(employeeTasks => {
-    tasksArray(employeeTasks).forEach(task => {
-      const key = normalizePhone(task.phone);
-      if(key) set.add(key);
-    });
-  });
-
-  return set;
-}
+let marketingAll={};
+let projectAll={};
 
 function validPhone(v){return String(v||"").replace(/\D/g,"").length>=7}
+function normalizePhone(v){
+  let d=String(v||"").replace(/\D/g,"");
+  if(d.startsWith("00966"))d=d.slice(2);
+  if(d.startsWith("966"))return d;
+  if(d.startsWith("05"))return "966"+d.slice(1);
+  if(d.startsWith("5")&&d.length===9)return "966"+d;
+  return d;
+}
 function normalizeRow(row){
- const obj={}; Object.keys(row||{}).forEach(k=>obj[String(k).trim().toLowerCase()]=row[k]);
- const name=obj["الاسم"]??obj["اسم العميل"]??obj["name"]??obj["client"]??obj["client name"]??"";
- const phone=obj["رقم التواصل"]??obj["الجوال"]??obj["رقم الجوال"]??obj["phone"]??obj["mobile"]??obj["number"]??"";
- return {clientName:String(name||"").trim(),phone:String(phone||"").trim()};
+  const o={};Object.keys(row||{}).forEach(k=>o[String(k).trim().toLowerCase()]=row[k]);
+  return {
+    clientName:String(o["الاسم"]??o["اسم العميل"]??o["name"]??o["client"]??"").trim(),
+    phone:String(o["رقم التواصل"]??o["الجوال"]??o["رقم الجوال"]??o["phone"]??o["mobile"]??"").trim()
+  };
+}
+async function getExistingPhoneSet(){
+  const snap=await db.ref("tasks").once("value"), all=snap.val()||{}, set=new Set();
+  Object.values(all).forEach(v=>tasksArray(v).forEach(t=>{const k=normalizePhone(t.phone);if(k)set.add(k)}));
+  return set;
 }
 async function addSingleTask(){
- const employeeNumber=singleEmployee.value,clientName=singleName.value.trim(),phone=singlePhone.value.trim(),note=singleNote.value.trim(),deadline=singleDeadline.value;
- if(!clientName||!validPhone(phone)){alert("أدخل اسم العميل ورقم تواصل صحيح");return}
- if(!deadline){alert("حدد تاريخ انتهاء المهمة");return}
-
- const existingPhones = await getExistingPhoneSet();
- const phoneKey = normalizePhone(phone);
- if(existingPhones.has(phoneKey)){
-   alert("هذا الرقم موجود مسبقًا في النظام ولن تتم إضافته مرة ثانية.");
-   return;
- }
-
- await db.ref("tasks/"+employeeNumber).push().set({clientName,phone,status:"جديد",note,deadline,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
- singleName.value="";singlePhone.value="";singleNote.value="";singleDeadline.value="";showToast("تم إرسال المهمة");
+  const employeeNumber=singleEmployee.value,clientName=singleName.value.trim(),phone=singlePhone.value.trim(),note=singleNote.value.trim(),deadline=singleDeadline.value;
+  if(!clientName||!validPhone(phone)){alert("أدخل اسم العميل ورقم تواصل صحيح");return}
+  if(!deadline){alert("حدد تاريخ انتهاء المهمة");return}
+  if((await getExistingPhoneSet()).has(normalizePhone(phone))){alert("هذا الرقم موجود مسبقًا في النظام.");return}
+  await db.ref("tasks/"+employeeNumber).push().set({clientName,phone,status:"جديد",note,deadline,workType:"marketing",createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
+  singleName.value="";singlePhone.value="";singleNote.value="";singleDeadline.value="";showToast("تم إرسال مهمة التواصل");
 }
 async function readSelectedFile(){
- const f=bulkFile.files[0]; if(!f)return [];
- const data=await f.arrayBuffer();
- const wb=XLSX.read(data,{type:"array"}); const ws=wb.Sheets[wb.SheetNames[0]];
- const rows=XLSX.utils.sheet_to_json(ws,{defval:""});
- return rows.map(normalizeRow).filter(r=>r.clientName&&validPhone(r.phone));
+  const f=bulkFile.files[0];if(!f)return[];
+  const data=await f.arrayBuffer(),wb=XLSX.read(data,{type:"array"}),ws=wb.Sheets[wb.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(ws,{defval:""}).map(normalizeRow).filter(r=>r.clientName&&validPhone(r.phone));
 }
 function readPaste(){
- return bulkPaste.value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(line=>{const parts=line.split(/[;,\t]/);return {clientName:(parts[0]||"").trim(),phone:(parts[1]||"").trim()}}).filter(r=>r.clientName&&validPhone(r.phone));
+  return bulkPaste.value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(line=>{
+    const p=line.split(/[;,\t]/);return{clientName:(p[0]||"").trim(),phone:(p[1]||"").trim()}
+  }).filter(r=>r.clientName&&validPhone(r.phone));
 }
 async function previewBulk(){
- try{parsedRows=[...(await readSelectedFile()),...readPaste()];
- const uniq=[];const seen=new Set(); for(const r of parsedRows){const k=normalizePhone(r.phone);if(!seen.has(k)){seen.add(k);uniq.push(r)}} parsedRows=uniq;
- importPreview.innerHTML=parsedRows.length?`<strong>جاهز للاستيراد: ${parsedRows.length} عميل</strong><div style="margin-top:8px;color:var(--muted)">${parsedRows.slice(0,5).map(r=>esc(r.clientName)+" — "+esc(r.phone)).join("<br>")}${parsedRows.length>5?"<br>...":""}</div>`:"لم أجد صفوفًا صالحة. تأكد أن الملف يحتوي الاسم والرقم.";
- }catch(e){console.error(e);alert("تعذر قراءة الملف. تأكد أنه Excel أو CSV صحيح.")}
+  parsedRows=[...(await readSelectedFile()),...readPaste()];
+  const seen=new Set();parsedRows=parsedRows.filter(r=>{const k=normalizePhone(r.phone);if(seen.has(k))return false;seen.add(k);return true});
+  importPreview.innerHTML=parsedRows.length?`<strong>جاهز للاستيراد: ${parsedRows.length} عميل</strong>`:"لم أجد بيانات صالحة.";
 }
 async function importBulk(){
- if(!parsedRows.length) await previewBulk();
- if(!parsedRows.length)return;
-
- const employeeNumber=bulkEmployee.value;
- const deadline=bulkDeadline.value;
- if(!deadline){alert("حدد تاريخ انتهاء المهام المستوردة");return}
-
- const existingPhones = await getExistingPhoneSet();
- const uniqueRows = [];
- const skipped = [];
- const batchSeen = new Set();
-
- parsedRows.forEach(r => {
-   const key = normalizePhone(r.phone);
-   if(!key || existingPhones.has(key) || batchSeen.has(key)){
-     skipped.push(r);
-     return;
-   }
-   batchSeen.add(key);
-   uniqueRows.push(r);
- });
-
- if(!uniqueRows.length){
-   alert(`لم تتم إضافة أي رقم. جميع الأرقام (${skipped.length}) موجودة مسبقًا أو مكررة.`);
-   return;
- }
-
- const base=db.ref("tasks/"+employeeNumber);
- const updates={};
- uniqueRows.forEach(r=>{
-   const key=base.push().key;
-   updates[key]={clientName:r.clientName,phone:r.phone,status:"جديد",note:"",deadline,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"};
- });
-
- await base.update(updates);
-
- const count=uniqueRows.length;
- const skippedCount=skipped.length;
- parsedRows=[];
- bulkFile.value="";
- bulkPaste.value="";
- bulkDeadline.value="";
- importPreview.textContent="لم يتم تحميل بيانات بعد.";
-
- showToast(skippedCount
-   ? `تم استيراد ${count} عميل وتجاهل ${skippedCount} رقم مكرر`
-   : `تم استيراد ${count} عميل`);
+  if(!parsedRows.length)await previewBulk();if(!parsedRows.length)return;
+  const employeeNumber=bulkEmployee.value,deadline=bulkDeadline.value;if(!deadline){alert("حدد تاريخ انتهاء المهام");return}
+  const existing=await getExistingPhoneSet(),seen=new Set(),valid=[],skipped=[];
+  parsedRows.forEach(r=>{const k=normalizePhone(r.phone);if(existing.has(k)||seen.has(k)){skipped.push(r)}else{seen.add(k);valid.push(r)}});
+  if(!valid.length){alert("كل الأرقام مكررة.");return}
+  const ref=db.ref("tasks/"+employeeNumber),updates={};
+  valid.forEach(r=>{updates[ref.push().key]={clientName:r.clientName,phone:r.phone,status:"جديد",note:"",deadline,workType:"marketing",createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"}});
+  await ref.update(updates);parsedRows=[];bulkFile.value="";bulkPaste.value="";bulkDeadline.value="";importPreview.textContent="لم يتم تحميل بيانات بعد.";
+  showToast(skipped.length?`تم استيراد ${valid.length} وتجاهل ${skipped.length} مكرر`:`تم استيراد ${valid.length} عميل`);
 }
-db.ref("tasks").on("value",snap=>{const all=snap.val()||{};taskCounts.innerHTML=employees.map(e=>{const s=calc(tasksArray(all[e.number]));return `<div class="card"><small>${esc(e.name)}</small><strong>${s.total}</strong><small>مهمة</small></div>`}).join("")});
-
-
-function isTaskOverdue(task){
-  if(!task || !task.deadline) return false;
-  const finished = task.status === "تم التحويل إلى عميل" || task.status === "مكتمل";
-  if(finished) return false;
-
-  const end = new Date(task.deadline + "T23:59:59");
-  return end.getTime() < Date.now();
+async function addProjectTask(){
+  const employeeNumber=projectEmployee.value,title=projectTitle.value.trim(),clientName=projectClientName.value.trim(),clientPhone=projectClientPhone.value.trim(),deadline=projectDeadline.value,department=projectDepartment.value,description=projectDescription.value.trim();
+  if(!title||!clientName||!clientPhone||!deadline||!description){alert("أكمل بيانات المهمة والعميل والتفاصيل وتاريخ التسليم.");return}
+  if(employeeNumber==="1970"&&department!=="التصميم"){alert("أحمد تابع لقسم التصميم.");return}
+  if(employeeNumber==="2003"&&!["تحليل البيانات","تصميم المواقع"].includes(department)){alert("يوسف تابع لتحليل البيانات وتصميم المواقع.");return}
+  await db.ref("projectTasks/"+employeeNumber).push().set({title,clientName,clientPhone,deadline,department,description,status:"قيد التنفيذ",workType:"project",createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
+  projectTitle.value="";projectClientName.value="";projectClientPhone.value="";projectDeadline.value="";projectDescription.value="";showToast("تم إرسال مهمة المشروع");
 }
+function past(d){return d&&new Date(d+"T23:59:59").getTime()<Date.now()}
+function renderAll(){
+  taskCounts.innerHTML=employees.map(e=>{
+    const m=calc(tasksArray(marketingAll[e.number])),p=projectStats(projectTasksArray(projectAll[e.number]));
+    return `<div class="card"><small>${esc(e.name)}</small><strong>${m.total+p.total}</strong><small>${isMarketingEmployee(e)?"مهام تواصل":"مهام مشاريع"}</small></div>`;
+  }).join("");
 
-function employeeByNumber(number){
-  return employees.find(e => e.number === String(number));
-}
-
-db.ref("tasks").on("value", snap => {
-  const all = snap.val() || {};
-  const overdue = [];
-
-  employees.forEach(emp => {
-    tasksArray(all[emp.number]).forEach(task => {
-      if(isTaskOverdue(task)){
-        overdue.push({ employee: emp, task });
+  const rows=[];
+  employees.forEach(e=>{
+    tasksArray(marketingAll[e.number]).forEach(t=>{if(past(t.deadline)&&t.status!=="تم التحويل إلى عميل")rows.push({e,type:"تواصل",label:t.clientName,date:t.deadline,status:t.status,id:t.id,source:"tasks"})});
+    projectTasksArray(projectAll[e.number]).forEach(t=>{
+      if(past(t.deadline)&&t.status!=="مكتملة"){
+        if(t.status!=="متأخرة")db.ref("projectTasks/"+e.number+"/"+t.id+"/status").set("متأخرة");
+        rows.push({e,type:"مشروع",label:t.title,date:t.deadline,status:"متأخرة",id:t.id,source:"projectTasks"});
       }
     });
   });
+  overdueEmpty.classList.toggle("hidden",rows.length>0);overdueWrap.classList.toggle("hidden",rows.length===0);
+  overdueBody.innerHTML=rows.map(r=>`<tr><td><strong>${esc(r.e.name)}</strong></td><td>${r.type}</td><td>${esc(r.label||"—")}</td><td>${esc(r.date||"—")}</td><td>${esc(r.status||"—")}</td><td><button class="action warning-action" onclick="openEmailModal('${r.e.number}','${r.id}','${r.source}')">✉️ إرسال تنبيه</button></td></tr>`).join("");
+}
+db.ref("tasks").on("value",s=>{marketingAll=s.val()||{};renderAll()});
+db.ref("projectTasks").on("value",s=>{projectAll=s.val()||{};renderAll()});
 
-  overdue.sort((a,b) => String(a.task.deadline).localeCompare(String(b.task.deadline)));
+function openEmailModal(employeeNumber,taskId,source){
+  const emp=employees.find(e=>e.number===String(employeeNumber));if(!emp)return;
+  db.ref(source+"/"+employeeNumber+"/"+taskId).once("value").then(s=>{
+    const task=s.val()||{};
+    emailEmployeeNumber.value=employeeNumber;emailTaskId.value=taskId;emailEmployeeName.value=emp.name;
+    employeeEmail.value=localStorage.getItem("employeeEmail_"+employeeNumber)||"";
+    emailSubject.value="تنبيه بخصوص تأخر تسليم المهمة";
+    emailMessage.value=`مرحبًا ${emp.name}،
 
-  const empty = overdue.length === 0;
-  overdueEmpty.classList.toggle("hidden", !empty);
-  overdueWrap.classList.toggle("hidden", empty);
-
-  overdueBody.innerHTML = overdue.map(({employee,task}) => `
-    <tr>
-      <td><strong>${esc(employee.name)}</strong><br><small style="color:var(--muted)">#${employee.number}</small></td>
-      <td>${esc(task.clientName || "—")}</td>
-      <td><strong style="color:var(--red)">${esc(task.deadline || "—")}</strong></td>
-      <td>${esc(task.status || "جديد")}</td>
-      <td>
-        <button class="action warning-action" onclick="openEmailModal('${employee.number}','${task.id}')">
-          ✉️ إرسال تنبيه
-        </button>
-      </td>
-    </tr>
-  `).join("");
-});
-
-function openEmailModal(employeeNumber, taskId){
-  const emp = employeeByNumber(employeeNumber);
-  if(!emp) return;
-
-  db.ref("tasks/" + employeeNumber + "/" + taskId).once("value").then(snap => {
-    const task = snap.val() || {};
-
-    emailEmployeeNumber.value = employeeNumber;
-    emailTaskId.value = taskId;
-    emailEmployeeName.value = emp.name;
-
-    // Remember a previously entered email for this employee on this browser.
-    employeeEmail.value = localStorage.getItem("employeeEmail_" + employeeNumber) || "";
-
-    emailSubject.value = "تنبيه بخصوص تأخر تسليم المهمة";
-
-    const deadlineText = task.deadline ? ` بتاريخ ${task.deadline}` : "";
-    emailMessage.value =
-`مرحبًا ${emp.name}،
-
-نود تنبيهك بأن المهمة الخاصة بالعميل "${task.clientName || "المهمة المسندة إليك"}" كان موعد تسليمها${deadlineText} ولم يتم إكمالها حتى الآن.
+نود تنبيهك بأن المهمة "${task.title||task.clientName||"المهمة المسندة إليك"}" تجاوزت موعد التسليم (${task.deadline||"غير محدد"}).
 
 يرجى إكمال وتسليم العمل خلال 24 ساعة من استلام هذا التنبيه.
 في حال عدم التسليم خلال هذه المدة، قد تتأثر نسبة الأداء والإنجاز المسجلة في النظام.
 
 شكرًا لك،
 إدارة الريادة البصرية`;
-
     emailModal.classList.add("show");
   });
 }
-
-function closeEmailModal(){
-  emailModal.classList.remove("show");
-}
-
+function closeEmailModal(){emailModal.classList.remove("show")}
 function sendWarningEmail(){
-  const email = employeeEmail.value.trim();
-  const subject = emailSubject.value.trim();
-  const message = emailMessage.value.trim();
-  const employeeNumber = emailEmployeeNumber.value;
-
-  if(!email){
-    alert("أدخل البريد الإلكتروني للموظف");
-    return;
-  }
-
-  localStorage.setItem("employeeEmail_" + employeeNumber, email);
-
-  const mailto =
-    "mailto:" + encodeURIComponent(email) +
-    "?subject=" + encodeURIComponent(subject) +
-    "&body=" + encodeURIComponent(message);
-
-  window.location.href = mailto;
+  const email=employeeEmail.value.trim();if(!email){alert("أدخل البريد الإلكتروني للموظف");return}
+  localStorage.setItem("employeeEmail_"+emailEmployeeNumber.value,email);
+  location.href="mailto:"+encodeURIComponent(email)+"?subject="+encodeURIComponent(emailSubject.value.trim())+"&body="+encodeURIComponent(emailMessage.value.trim());
   closeEmailModal();
-  showToast("تم تجهيز رسالة التنبيه");
 }

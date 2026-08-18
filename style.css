@@ -350,3 +350,5 @@ th{background:#f7f5ff;color:#596174}
   text-align:left;
   font-variant-numeric:tabular-nums;
 }
+
+.task-description{max-width:340px;white-space:normal;line-height:1.7;color:var(--text)}

@@ -35,67 +35,44 @@
     </header>
 
     <div class="content">
-      <section class="head">
-        <div>
-          <h2>مرحبًا <span id="welcomeName"></span> 👋</h2>
-          <p>كل عميل يرسله المدير يظهر هنا كمهمة مستقلة.</p>
-        </div>
+<section class="head">
+  <div><h2>مرحبًا <span id="welcomeName"></span> 👋</h2><p id="employeePageDescription">مهامك تظهر هنا.</p></div>
+  <div class="card" style="min-width:160px"><small id="scoreLabel">نسبة الإنجاز</small><strong id="empScore">0%</strong></div>
+</section>
 
-        <div class="card" style="min-width:160px">
-          <small>نسبة التواصل</small>
-          <strong id="empScore">0%</strong>
-        </div>
-      </section>
+<section id="marketingArea" class="hidden">
+  <section class="target-box">
+    <div class="target-head"><div><h3 style="margin:0 0 5px">🎯 التارقت الشهري</h3><small style="color:var(--muted)">5 عملاء فعليين</small></div><div class="target-number"><span id="empWon">0</span> / 5</div></div>
+    <div class="progress"><span id="targetBar" style="width:0%"></span></div>
+  </section>
+  <section class="stats">
+    <div class="card"><small>إجمالي المهام</small><strong id="empTotal">0</strong></div>
+    <div class="card"><small>تم التواصل</small><strong id="empContacted">0</strong></div>
+    <div class="card"><small>عملاء مكتسبون</small><strong id="empWon2">0</strong></div>
+    <div class="card"><small>مؤجل</small><strong id="empPostponed">0</strong></div>
+    <div class="card"><small>متبقي للتارقت</small><strong id="empRemaining">5</strong></div>
+  </section>
+  <section class="panel"><h3>مهام التواصل</h3>
+    <div id="employeeEmpty" class="empty"><div class="emoji">📭</div><strong>لا توجد مهام حتى الآن</strong></div>
+    <div id="employeeTableWrap" class="table-wrap hidden"><table><thead><tr><th>#</th><th>اسم العميل</th><th>رقم التواصل</th><th>تاريخ الانتهاء</th><th>الحالة</th><th>الملاحظة</th><th>حفظ</th></tr></thead><tbody id="employeeTasksBody"></tbody></table></div>
+  </section>
+</section>
 
-      <section class="target-box">
-        <div class="target-head">
-          <div>
-            <h3 style="margin:0 0 5px">🎯 التارقت الشهري</h3>
-            <small style="color:var(--muted)">5 عملاء فعليين</small>
-          </div>
-          <div class="target-number"><span id="empWon">0</span> / 5</div>
-        </div>
-
-        <div class="progress"><span id="targetBar" style="width:0%"></span></div>
-      </section>
-
-      <section class="stats">
-        <div class="card"><small>إجمالي المهام</small><strong id="empTotal">0</strong></div>
-        <div class="card"><small>تم التواصل</small><strong id="empContacted">0</strong></div>
-        <div class="card"><small>عملاء مكتسبون</small><strong id="empWon2">0</strong></div>
-        <div class="card"><small>مؤجل</small><strong id="empPostponed">0</strong></div>
-        <div class="card"><small>متبقي للتارقت</small><strong id="empRemaining">5</strong></div>
-      </section>
-
-      <section class="panel">
-        <h3>مهام التواصل</h3>
-
-        <div id="employeeEmpty" class="empty">
-          <div class="emoji">📭</div>
-          <strong>لا توجد مهام حتى الآن</strong>
-          <div style="margin-top:6px">عند إضافة نورة عميلًا لك سيظهر هنا مباشرة.</div>
-        </div>
-
-        <div id="employeeTableWrap" class="table-wrap hidden">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>اسم العميل</th>
-                <th>رقم التواصل</th>
-                <th>تاريخ الانتهاء</th>
-                <th>الحالة</th>
-                <th>الملاحظة</th>
-                <th>حفظ</th>
-              </tr>
-            </thead>
-            <tbody id="employeeTasksBody"></tbody>
-          </table>
-        </div>
-      </section>
-    </div>
-
-    <div class="footer">© 2026 نظام أداء الموظفين</div>
+<section id="projectArea" class="hidden">
+  <section class="stats">
+    <div class="card"><small>إجمالي المهام</small><strong id="projectTotal">0</strong></div>
+    <div class="card"><small>قيد التنفيذ</small><strong id="projectInProgress">0</strong></div>
+    <div class="card"><small>مكتملة</small><strong id="projectCompleted">0</strong></div>
+    <div class="card"><small>متأخرة</small><strong id="projectOverdue">0</strong></div>
+    <div class="card"><small>نسبة الإنجاز</small><strong id="projectPct">0%</strong></div>
+  </section>
+  <section class="panel"><h3>مهام المشاريع</h3>
+    <div id="projectEmpty" class="empty"><div class="emoji">🧩</div><strong>لا توجد مهام مشاريع حتى الآن</strong></div>
+    <div id="projectTableWrap" class="table-wrap hidden"><table><thead><tr><th>#</th><th>المهمة</th><th>العميل</th><th>رقم التواصل</th><th>القسم</th><th>تفاصيل المهمة</th><th>تاريخ التسليم</th><th>الحالة</th><th>حفظ</th></tr></thead><tbody id="projectTasksBody"></tbody></table></div>
+  </section>
+</section>
+</div>
+<div class="footer">© 2026 نظام أداء الموظفين</div>
   </main>
 </div>
 
