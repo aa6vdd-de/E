@@ -108,7 +108,7 @@ function openEmailModal(employeeNumber,taskId,source){
   db.ref(source+"/"+employeeNumber+"/"+taskId).once("value").then(s=>{
     const task=s.val()||{};
     emailEmployeeNumber.value=employeeNumber;emailTaskId.value=taskId;emailEmployeeName.value=emp.name;
-    employeeEmail.value=localStorage.getItem("employeeEmail_"+employeeNumber)||"";
+    employeeEmail.value=localStorage.getItem("employeeEmail_"+employeeNumber)||accountEmail(employeeNumber)||"";
     emailSubject.value="تنبيه بخصوص تأخر تسليم المهمة";
     emailMessage.value=`مرحبًا ${emp.name}،
 

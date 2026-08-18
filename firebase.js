@@ -13,13 +13,13 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const accounts = [
-  {name:"نورة", aliases:["نورة","نوره"], number:"2000", role:"manager"},
+  {name:"نورة", aliases:["نورة","نوره"], number:"2000", role:"manager", email:"1@visulallead1.com"},
   {name:"أريام", aliases:["أريام","اريام"], number:"1890", role:"employee", department:"التسويق"},
   {name:"طيف", aliases:["طيف"], number:"1818", role:"employee", department:"التسويق"},
   {name:"دلال", aliases:["دلال"], number:"1018", role:"employee", department:"التسويق"},
   {name:"أحمد", aliases:["أحمد","احمد"], number:"1970", role:"employee", department:"التصميم"},
-  {name:"يوسف", aliases:["يوسف"], number:"2003", role:"employee", department:"تصميم المواقع"},
-  {name:"يوسف", aliases:["يوسف"], number:"2004", role:"employee", department:"تحليل البيانات"}
+  {name:"يوسف", aliases:["يوسف"], number:"2003", role:"employee", department:"تصميم المواقع", email:"aa6vdd@gmail.com"},
+  {name:"يوسف", aliases:["يوسف"], number:"2004", role:"employee", department:"تحليل البيانات", email:"aa6vdd@gmail.com"}
 ];
 
 const employees = accounts.filter(a => a.role === "employee");
@@ -66,6 +66,7 @@ async function ensureProfiles(){
     updates["profiles/"+a.number+"/name"] = a.name;
     updates["profiles/"+a.number+"/role"] = a.role;
     updates["profiles/"+a.number+"/employeeNumber"] = a.number;
+    if(a.email) updates["profiles/"+a.number+"/email"] = a.email;
     if(a.role === "employee"){
       updates["profiles/"+a.number+"/monthlyTarget"] = monthlyTarget;
       updates["profiles/"+a.number+"/department"] = a.department || "";
@@ -110,4 +111,9 @@ function projectStats(tasks){
   const overdue=tasks.filter(t=>t.status==="متأخرة").length;
   const pct=total?Math.round(completed/total*100):0;
   return {total,completed,inProgress,overdue,pct};
+}
+
+function accountEmail(number){
+  const account = accounts.find(a => a.number === String(number));
+  return account?.email || "";
 }

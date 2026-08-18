@@ -24,7 +24,7 @@ function card(e,total,a,b,pct,labelA,labelB){
 }
 function openManagerWarning(employeeNumber){
   const emp=employees.find(e=>e.number===String(employeeNumber));if(!emp)return;
-  warningEmployeeNumber.value=emp.number;warningEmployeeName.value=emp.name;warningEmployeeEmail.value=localStorage.getItem("employeeEmail_"+emp.number)||"";
+  warningEmployeeNumber.value=emp.number;warningEmployeeName.value=emp.name;warningEmployeeEmail.value=localStorage.getItem("employeeEmail_"+emp.number)||accountEmail(emp.number)||"";
   warningSubject.value="تنبيه بخصوص تأخر التسليم";
   warningMessage.value=`مرحبًا ${emp.name}،
 

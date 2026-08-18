@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>توزيع المبالغ والربحية</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="mini-logo">💰</div><div><h1>لوحة المديرة</h1><p>إدارة الربحية</p></div></div>
+  <nav class="menu">
+    <a href="manager.html">⌂ الصفحة العامة</a>
+    <a href="employees.html">👥 الموظفون</a>
+    <a href="departments.html">🏢 الأقسام</a>
+    <a href="tasks.html">📋 المهام</a>
+    <a class="active" href="finance.html">💰 توزيع المبالغ والربحية</a>
+    <a href="reports.html">📈 التقارير</a>
+    <button onclick="managerLogout()">↪ تسجيل خروج</button>
+  </nav>
+  <div class="user-box">
+    <strong>نورة</strong>
+    <small>مديرة النظام</small>
+    <small>الرقم الوظيفي: 2000</small>
+    <small>1@visulallead1.com</small>
+  </div>
+</aside>
+
+<main class="main">
+<header class="topbar"><strong>نظام أداء الموظفين</strong><span>توزيع المبالغ والربحية</span></header>
+
+<div class="content">
+  <section class="head">
+    <div>
+      <h2>توزيع المبالغ والربحية</h2>
+      <p>أدخلي قيمة المشروع والمصاريف ومبالغ الموظفين، والنظام يحسب صافي الربح والهامش تلقائيًا.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3>بيانات المشروع</h3>
+    <div class="grid">
+      <div class="field">
+        <label>اسم المشروع / العملية</label>
+        <input id="financeProjectName" placeholder="مثال: مشروع هوية بصرية">
+      </div>
+      <div class="field">
+        <label>المبلغ الإجمالي (ريال)</label>
+        <input id="financeTotal" type="number" min="0" step="0.01" placeholder="2000">
+      </div>
+      <div class="field">
+        <label>التكاليف الأساسية (ريال)</label>
+        <input id="financeBaseCosts" type="number" min="0" step="0.01" value="0">
+      </div>
+      <div class="field">
+        <label>التكاليف الإضافية (ريال)</label>
+        <input id="financeExtraCosts" type="number" min="0" step="0.01" value="0">
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h3>الموظفون المستفيدون</h3>
+        <p style="color:var(--muted);margin:5px 0 0">اختاري الموظفين المشاركين وأدخلي مبلغًا ثابتًا لكل موظف.</p>
+      </div>
+      <div class="beneficiary-count">
+        <small>عدد المستفيدين</small>
+        <strong id="beneficiaryCount">0</strong>
+      </div>
+    </div>
+
+    <div id="beneficiaryList" class="beneficiary-list"></div>
+  </section>
+
+  <section class="stats finance-stats">
+    <div class="card">
+      <small>المبلغ الإجمالي</small>
+      <strong id="resultTotal">0 ر.س</strong>
+    </div>
+    <div class="card">
+      <small>إجمالي التكاليف</small>
+      <strong id="resultCosts">0 ر.س</strong>
+    </div>
+    <div class="card">
+      <small>مبالغ الموظفين</small>
+      <strong id="resultEmployees">0 ر.س</strong>
+    </div>
+    <div class="card">
+      <small>صافي الربح</small>
+      <strong id="resultNet">0 ر.س</strong>
+    </div>
+    <div class="card">
+      <small>هامش الربح</small>
+      <strong id="resultMargin">0%</strong>
+    </div>
+  </section>
+
+  <section id="profitStatus" class="profit-status neutral">
+    أدخلي بيانات المشروع لعرض حالة هامش الربح.
+  </section>
+
+  <section class="panel">
+    <div class="modal-actions">
+      <button class="primary" onclick="saveDistribution()">💾 حفظ العملية</button>
+      <button class="secondary" onclick="resetDistribution()">تفريغ الحقول</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h3>العمليات المحفوظة</h3>
+    <div id="financeHistoryEmpty" class="empty" style="padding:28px">لا توجد عمليات محفوظة حتى الآن.</div>
+    <div id="financeHistoryWrap" class="table-wrap hidden">
+      <table>
+        <thead>
+          <tr>
+            <th>التاريخ</th>
+            <th>المشروع</th>
+            <th>المبلغ</th>
+            <th>التكاليف</th>
+            <th>الموظفون</th>
+            <th>صافي الربح</th>
+            <th>الهامش</th>
+            <th>إجراء</th>
+          </tr>
+        </thead>
+        <tbody id="financeHistoryBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="footer">© 2026 نظام أداء الموظفين</div>
+</main>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="firebase.js"></script>
+<script src="manager-common.js"></script>
+<script src="finance.js"></script>
+</body>
+</html>

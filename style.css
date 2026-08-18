@@ -355,3 +355,53 @@ th{background:#f7f5ff;color:#596174}
 
 .delete-action{border:1px solid #ef4444;background:#fff1f2;color:#b91c1c}
 .delete-action:hover{background:#ffe4e6}
+
+
+/* ===== Profit distribution ===== */
+.beneficiary-count{
+  min-width:110px;
+  text-align:center;
+  background:#f7f5ff;
+  border:1px solid #e6e0ff;
+  border-radius:12px;
+  padding:10px 14px;
+}
+.beneficiary-count small{display:block;color:var(--muted);font-size:12px}
+.beneficiary-count strong{display:block;font-size:24px;color:var(--purple);margin-top:3px}
+.beneficiary-list{display:grid;gap:10px}
+.beneficiary-row{
+  display:grid;
+  grid-template-columns:1fr 220px;
+  gap:14px;
+  align-items:center;
+  border:1px solid var(--line);
+  background:#fbfcfe;
+  padding:13px 14px;
+  border-radius:12px;
+}
+.beneficiary-person{display:flex;align-items:center;gap:11px;cursor:pointer}
+.beneficiary-person input{width:18px;height:18px}
+.beneficiary-person strong{display:block}
+.beneficiary-person small{display:block;color:var(--muted);margin-top:3px}
+.beneficiary-amount{display:flex;align-items:center;gap:9px}
+.beneficiary-amount label{font-size:12px;color:var(--muted)}
+.beneficiary-amount input{
+  width:150px;height:38px;border:1px solid #dce2eb;border-radius:8px;padding:0 9px
+}
+.beneficiary-amount input:disabled{background:#f0f2f5;color:#9aa3b2}
+.finance-stats{grid-template-columns:repeat(5,1fr)}
+.profit-status{
+  border-radius:14px;
+  padding:18px;
+  margin-bottom:20px;
+  font-weight:700;
+  border:1px solid var(--line);
+}
+.profit-status.neutral{background:#f8f9fc;color:var(--muted)}
+.profit-status.good{background:var(--greenbg);color:var(--green);border-color:#bfe9d2}
+.profit-status.warning{background:var(--redbg);color:var(--red);border-color:#f6c4c7}
+@media(max-width:900px){
+  .beneficiary-row{grid-template-columns:1fr}
+  .beneficiary-amount{justify-content:space-between}
+  .finance-stats{grid-template-columns:1fr 1fr}
+}
