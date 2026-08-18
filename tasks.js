@@ -103,40 +103,54 @@ function renderAll(){
 db.ref("tasks").on("value",s=>{marketingAll=s.val()||{};renderAll()});
 db.ref("projectTasks").on("value",s=>{projectAll=s.val()||{};renderAll()});
 
+
 function openEmailModal(employeeNumber,taskId,source){
-  const emp=employees.find(e=>e.number===String(employeeNumber));if(!emp)return;
+  const emp=employees.find(e=>e.number===String(employeeNumber));
+  if(!emp)return;
+
   db.ref(source+"/"+employeeNumber+"/"+taskId).once("value").then(s=>{
-    const task=s.val()||{};
-    emailEmployeeNumber.value=employeeNumber;emailTaskId.value=taskId;emailEmployeeName.value=emp.name;
+    emailEmployeeNumber.value=employeeNumber;
+    emailTaskId.value=taskId;
+    emailEmployeeName.value=emp.name;
     employeeEmail.value=localStorage.getItem("employeeEmail_"+employeeNumber)||accountEmail(employeeNumber)||"";
-    emailSubject.value="تنبيه بخصوص تأخر تسليم المهمة";
-    emailMessage.value=`مرحبًا ${emp.name}،
-
-نود تنبيهك بأن المهمة "${task.title||task.clientName||"المهمة المسندة إليك"}" تجاوزت موعد التسليم (${task.deadline||"غير محدد"}).
-
-يرجى إكمال وتسليم العمل خلال 24 ساعة من استلام هذا التنبيه.
-في حال عدم التسليم خلال هذه المدة، قد تتأثر نسبة الأداء والإنجاز المسجلة في النظام.
-
-شكرًا لك،
-إدارة الريادة البصرية`;
+    emailSubject.value="";
+    emailMessage.value="";
+    emailSubject.placeholder="اكتب عنوان الرسالة";
+    emailMessage.placeholder="اكتب نص التحذير أو الرسالة هنا...";
     emailModal.classList.add("show");
   });
 }
-function closeEmailModal(){emailModal.classList.remove("show")}
-function sendWarningEmail(){
-  const email=employeeEmail.value.trim();if(!email){alert("أدخل البريد الإلكتروني للموظف");return}
-  localStorage.setItem("employeeEmail_"+emailEmployeeNumber.value,email);
-  location.href="mailto:"+encodeURIComponent(email)+"?subject="+encodeURIComponent(emailSubject.value.trim())+"&body="+encodeURIComponent(emailMessage.value.trim());
-  closeEmailModal();
+
+function closeEmailModal(){
+  emailModal.classList.remove("show");
 }
 
-async function deleteTask(employeeNumber, taskId, source){
-  if(!confirm("هل أنت متأكد من حذف هذه المهمة؟")) return;
+function sendWarningEmail(){
+  const email=employeeEmail.value.trim();
+  const subject=emailSubject.value.trim();
+  const message=emailMessage.value.trim();
+
+  if(!email){alert("لا يوجد بريد إلكتروني لهذا الموظف. أضفه أولًا.");return}
+  if(!subject){alert("اكتب عنوان الرسالة.");return}
+  if(!message){alert("اكتب نص الرسالة.");return}
+
+  localStorage.setItem("employeeEmail_"+emailEmployeeNumber.value,email);
+
+  location.href="mailto:"+encodeURIComponent(email)+
+    "?subject="+encodeURIComponent(subject)+
+    "&body="+encodeURIComponent(message);
+
+  closeEmailModal();
+  showToast("تم تجهيز رسالة البريد");
+}
+
+async function deleteTask(employeeNumber,taskId,source){
+  if(!confirm("هل أنت متأكدة من حذف هذه المهمة؟"))return;
   try{
     await db.ref(source+"/"+employeeNumber+"/"+taskId).remove();
     showToast("تم حذف المهمة");
   }catch(err){
     console.error(err);
-    alert("تعذر حذف المهمة. حاول مرة أخرى.");
+    alert("تعذر حذف المهمة. حاولي مرة أخرى.");
   }
 }

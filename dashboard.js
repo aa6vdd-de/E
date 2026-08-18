@@ -22,21 +22,46 @@ function card(e,total,a,b,pct,labelA,labelB){
     <div class="dashboard-performance"><div><small>نسبة الإنجاز</small><strong>${pct}%</strong></div><div class="progress"><span style="width:${pct}%"></span></div></div>
   </article>`;
 }
+
 function openManagerWarning(employeeNumber){
-  const emp=employees.find(e=>e.number===String(employeeNumber));if(!emp)return;
-  warningEmployeeNumber.value=emp.number;warningEmployeeName.value=emp.name;warningEmployeeEmail.value=localStorage.getItem("employeeEmail_"+emp.number)||accountEmail(emp.number)||"";
-  warningSubject.value="تنبيه بخصوص تأخر التسليم";
-  warningMessage.value=`مرحبًا ${emp.name}،
+  const emp=employees.find(e=>e.number===String(employeeNumber));
+  if(!emp)return;
 
-نود تنبيهك بوجود تأخر في تسليم العمل أو المشروع المسند إليك.
-
-يرجى إكمال وتسليم العمل خلال 24 ساعة من استلام هذا التنبيه.
-في حال عدم التسليم خلال هذه المدة، قد تتأثر نسبة الأداء والإنجاز المسجلة في النظام.
-
-شكرًا لك،
-إدارة الريادة البصرية`;
+  warningEmployeeNumber.value=emp.number;
+  warningEmployeeName.value=emp.name;
+  warningEmployeeEmail.value=localStorage.getItem("employeeEmail_"+emp.number)||accountEmail(emp.number)||"";
+  warningSubject.value="";
+  warningMessage.value="";
+  warningSubject.placeholder="اكتب عنوان الرسالة";
+  warningMessage.placeholder="اكتب نص التحذير أو الرسالة هنا...";
   managerWarningModal.classList.add("show");
 }
-function closeManagerWarning(){managerWarningModal.classList.remove("show")}
-function saveEmployeeEmail(){const email=warningEmployeeEmail.value.trim();if(!email){alert("أدخل البريد الإلكتروني أولًا");return}localStorage.setItem("employeeEmail_"+warningEmployeeNumber.value,email);showToast("تم حفظ بريد الموظف")}
-function sendManagerWarning(){const email=warningEmployeeEmail.value.trim();if(!email){alert("أدخل البريد الإلكتروني للموظف");return}localStorage.setItem("employeeEmail_"+warningEmployeeNumber.value,email);location.href="mailto:"+encodeURIComponent(email)+"?subject="+encodeURIComponent(warningSubject.value.trim())+"&body="+encodeURIComponent(warningMessage.value.trim());closeManagerWarning()}
+
+function closeManagerWarning(){
+  managerWarningModal.classList.remove("show");
+}
+
+function saveEmployeeEmail(){
+  const email=warningEmployeeEmail.value.trim();
+  if(!email){alert("أدخل البريد الإلكتروني أولًا");return}
+  localStorage.setItem("employeeEmail_"+warningEmployeeNumber.value,email);
+  showToast("تم حفظ بريد الموظف");
+}
+
+function sendManagerWarning(){
+  const email=warningEmployeeEmail.value.trim();
+  const subject=warningSubject.value.trim();
+  const message=warningMessage.value.trim();
+
+  if(!email){alert("لا يوجد بريد إلكتروني لهذا الموظف. أضفه أولًا.");return}
+  if(!subject){alert("اكتب عنوان الرسالة.");return}
+  if(!message){alert("اكتب نص الرسالة.");return}
+
+  localStorage.setItem("employeeEmail_"+warningEmployeeNumber.value,email);
+
+  location.href="mailto:"+encodeURIComponent(email)+
+    "?subject="+encodeURIComponent(subject)+
+    "&body="+encodeURIComponent(message);
+
+  closeManagerWarning();
+}
