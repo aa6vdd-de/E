@@ -573,3 +573,119 @@ input:focus,select:focus,textarea:focus{
 .login-brand-logo {
   object-fit:contain!important;
 }
+
+/* ===== v22 critical logo size fix ===== */
+
+/* Sidebar logo: never exceed its box */
+.brand-logo{
+  width:64px!important;
+  height:64px!important;
+  min-width:64px!important;
+  max-width:64px!important;
+  min-height:64px!important;
+  max-height:64px!important;
+  overflow:hidden!important;
+  flex:0 0 64px!important;
+  position:relative!important;
+  background:transparent!important;
+  border:none!important;
+  padding:0!important;
+}
+
+.brand-logo img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:64px!important;
+  max-height:64px!important;
+  object-fit:contain!important;
+  position:static!important;
+  transform:none!important;
+  margin:0!important;
+  inset:auto!important;
+}
+
+/* Login page identity logo: controlled, centered, no overflow */
+.login-identity{
+  width:100%!important;
+  max-width:520px!important;
+  margin:0 auto 18px!important;
+  text-align:center!important;
+  overflow:hidden!important;
+}
+
+.login-brand-logo{
+  display:block!important;
+  width:260px!important;
+  max-width:75%!important;
+  height:auto!important;
+  max-height:230px!important;
+  object-fit:contain!important;
+  margin:0 auto 12px!important;
+  position:static!important;
+  transform:none!important;
+  inset:auto!important;
+  background:transparent!important;
+  border:none!important;
+  padding:0!important;
+}
+
+/* Any generic sidebar brand image */
+.sidebar-brand-image{
+  width:64px!important;
+  height:64px!important;
+  max-width:64px!important;
+  max-height:64px!important;
+  object-fit:contain!important;
+  position:static!important;
+  transform:none!important;
+}
+
+/* Prevent brand images from ever covering page content */
+.brand img,
+.login-identity img{
+  z-index:auto!important;
+}
+
+/* Right-side login panel layout */
+.login-side{
+  overflow:hidden!important;
+}
+
+.login-side .login-identity{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+
+/* Responsive */
+@media(max-width:900px){
+  .login-brand-logo{
+    width:210px!important;
+    max-height:180px!important;
+  }
+}
+
+@media(max-width:600px){
+  .brand-logo,
+  .sidebar-brand-image{
+    width:52px!important;
+    height:52px!important;
+    min-width:52px!important;
+    max-width:52px!important;
+    min-height:52px!important;
+    max-height:52px!important;
+    flex-basis:52px!important;
+  }
+
+  .brand-logo img{
+    max-width:52px!important;
+    max-height:52px!important;
+  }
+
+  .login-brand-logo{
+    width:170px!important;
+    max-height:145px!important;
+  }
+}
