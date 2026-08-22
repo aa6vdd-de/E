@@ -405,3 +405,171 @@ th{background:#f7f5ff;color:#596174}
   .beneficiary-amount{justify-content:space-between}
   .finance-stats{grid-template-columns:1fr 1fr}
 }
+
+/* Visual Leadership brand */
+:root{--brand-beige:#d2b890;--brand-navy:#24224c;--purple:#24224c;--purple2:#d2b890;--navy:#24224c;--sidebar:#24224c;--sidebar2:#1d1b40;--accent:#d2b890}
+body{background:#f7f6f3}.sidebar,.topbar{background:#24224c!important}.sidebar{background:linear-gradient(180deg,#24224c,#1d1b40)!important}
+.menu a.active,.menu a:hover,.menu button:hover{background:rgba(210,184,144,.18)!important;color:#fff!important}
+.primary,.action.primary{background:#24224c!important;border-color:#24224c!important;color:#fff!important}.primary:hover{background:#302e62!important}
+.card strong,.head h2,.panel h3{color:#24224c}.progress span{background:#d2b890!important}
+.brand-logo{width:58px!important;height:58px!important;border-radius:14px!important;background:#fff!important;padding:5px!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.brand-logo img{width:100%!important;height:100%!important;object-fit:contain!important}
+input:focus,select:focus,textarea:focus{border-color:#d2b890!important;box-shadow:0 0 0 3px rgba(210,184,144,.18)!important}
+.login-identity{text-align:center;margin-bottom:20px}.login-brand-logo{display:block;width:min(250px,72%);height:130px;object-fit:contain;margin:0 auto 8px}
+.login-identity strong{display:block;color:#24224c;font-size:24px}.login-identity small{display:block;color:#777;margin-top:3px;letter-spacing:2px}
+
+.sidebar-brand-image{
+  width:72px;
+  height:72px;
+  object-fit:contain;
+  background:#fff;
+  border-radius:14px;
+  padding:6px;
+  flex:0 0 auto;
+}
+
+/* ===== Final Visual Leadership identity ===== */
+:root{
+  --brand-navy:#24224c;
+  --brand-beige:#d2b890;
+  --navy:#24224c;
+  --navy2:#1b1a3d;
+  --purple:#24224c;
+  --purple2:#d2b890;
+  --bg:#f7f6f3;
+  --card:#ffffff;
+  --text:#24224c;
+  --muted:#7f7d8f;
+  --line:#e8e3da;
+}
+body{background:#f7f6f3;color:#24224c}
+.sidebar{
+  background:linear-gradient(180deg,#24224c 0%,#1b1a3d 100%)!important;
+}
+.topbar{
+  background:#24224c!important;
+  border-bottom:1px solid rgba(210,184,144,.24);
+}
+.brand-visual{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:10px 4px 18px!important;
+}
+.brand-logo{
+  width:74px!important;
+  height:74px!important;
+  background:#24224c!important;
+  border:1px solid rgba(210,184,144,.35)!important;
+  border-radius:14px!important;
+  padding:3px!important;
+  box-shadow:none!important;
+}
+.brand-logo img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  background:#24224c!important;
+}
+.brand-copy h1{
+  color:#fff!important;
+  font-size:17px!important;
+  margin:0!important;
+}
+.brand-copy p{
+  color:#d2b890!important;
+  font-size:11px!important;
+  margin:4px 0 0!important;
+  letter-spacing:.6px!important;
+}
+.menu a,.menu button{color:#fff!important}
+.menu a.active{
+  background:#d2b890!important;
+  color:#24224c!important;
+  font-weight:700!important;
+}
+.menu a:hover,.menu button:hover{
+  background:rgba(210,184,144,.18)!important;
+}
+.card,.panel,.target-box,.department-card,.dashboard-employee-card,.dashboard-link-card{
+  border-color:#e8e3da!important;
+  box-shadow:0 6px 22px rgba(36,34,76,.055)!important;
+}
+.primary{
+  background:#24224c!important;
+  color:#fff!important;
+}
+.primary:hover{background:#302e62!important}
+.secondary{
+  border:1px solid #d2b890!important;
+  color:#24224c!important;
+  background:#fbf8f2!important;
+}
+.action{
+  border-color:#d9d1c3!important;
+}
+.progress span,.department-progress span{
+  background:#d2b890!important;
+}
+.department-link{color:#24224c!important}
+.avatar{
+  background:#f1e7d7!important;
+  color:#24224c!important;
+}
+.head h2,.panel h3,.card strong,.target-number{
+  color:#24224c!important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:#d2b890!important;
+  box-shadow:0 0 0 3px rgba(210,184,144,.20)!important;
+}
+.login-side{
+  background:#24224c!important;
+}
+.login-brand-logo{
+  background:#24224c!important;
+  border-radius:16px!important;
+  padding:8px!important;
+  width:min(320px,80%)!important;
+  height:190px!important;
+}
+.login-identity strong{color:#24224c!important}
+.login-btn{
+  background:#24224c!important;
+}
+.finance-stats .card strong{color:#24224c!important}
+.beneficiary-count{
+  background:#fbf8f2!important;
+  border-color:#e4d6bf!important;
+}
+.beneficiary-count strong{color:#24224c!important}
+.profit-status.good{border-color:#cbd9cf!important}
+.warning-action{
+  background:#fff8e9!important;
+  border-color:#e9d1a7!important;
+  color:#7c5a27!important;
+}
+.delete-action{
+  background:#fff1f2!important;
+  border-color:#efc4c7!important;
+}
+@media(max-width:800px){
+  .brand-logo{width:64px!important;height:64px!important}
+}
+
+/* v21 — transparent logo, cache-busted filename */
+.brand-logo,
+.login-brand-logo,
+.sidebar-brand-image {
+  background:transparent!important;
+  border:none!important;
+  box-shadow:none!important;
+  padding:0!important;
+}
+.brand-logo img {
+  background:transparent!important;
+  object-fit:contain!important;
+}
+.login-brand-logo {
+  object-fit:contain!important;
+}
