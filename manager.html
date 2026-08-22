@@ -53,7 +53,37 @@
     <div id="dashboardEmployees" class="dashboard-employee-grid"></div>
   </section>
 
-  <section class="dashboard-quick-links">
+  
+  <section class="panel">
+    <div class="panel-head dashboard-section-head">
+      <div>
+        <h3>📝 سجل التواصل والملاحظات</h3>
+        <p>كل تحديث يكتبه موظفو التسويق يظهر هنا مباشرة.</p>
+      </div>
+    </div>
+
+    <div id="managerContactNotesEmpty" class="empty" style="padding:28px">
+      لا توجد ملاحظات تواصل حتى الآن.
+    </div>
+
+    <div id="managerContactNotesWrap" class="table-wrap hidden">
+      <table>
+        <thead>
+          <tr>
+            <th>الموظف</th>
+            <th>اسم العميل</th>
+            <th>رقم التواصل</th>
+            <th>الحالة</th>
+            <th>الملاحظة</th>
+            <th>آخر تحديث</th>
+          </tr>
+        </thead>
+        <tbody id="managerContactNotesBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+<section class="dashboard-quick-links">
     <a class="dashboard-link-card" href="departments.html">
       <span>🏢</span>
       <div><strong>الأقسام</strong><small>تفاصيل كل قسم والموظفين</small></div>

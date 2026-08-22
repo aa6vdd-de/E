@@ -689,3 +689,23 @@ input:focus,select:focus,textarea:focus{
     max-height:145px!important;
   }
 }
+
+/* Manager communication notes */
+.manager-note-text{
+  min-width:220px;
+  max-width:420px;
+  white-space:normal;
+  line-height:1.7;
+  color:var(--text);
+}
+.contact-status-badge{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#f4eadb;
+  color:#66502f;
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+}

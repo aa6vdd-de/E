@@ -12,6 +12,7 @@ db.ref().on("value",snap=>{
     totalTasks+=s.total;totalDone+=s.completed;totalPct+=s.pct;
     return card(e,s.total,s.completed,s.overdue,s.pct,"مكتملة","متأخرة");
   }).join("");
+  renderManagerContactNotes(marketing);
   mgrEmpCount.textContent=employees.length;mgrTaskCount.textContent=totalTasks;mgrContacted.textContent=totalDone;mgrWon.textContent=totalWon;mgrAvg.textContent=Math.round(totalPct/employees.length||0)+"%";
 });
 function card(e,total,a,b,pct,labelA,labelB){
@@ -64,4 +65,72 @@ function sendManagerWarning(){
     "&body="+encodeURIComponent(message);
 
   closeManagerWarning();
+}
+
+
+function formatManagerDate(timestamp){
+  if(!timestamp) return "—";
+  try{
+    return new Date(timestamp).toLocaleString("ar-SA",{
+      year:"numeric",month:"2-digit",day:"2-digit",
+      hour:"2-digit",minute:"2-digit"
+    });
+  }catch(e){
+    return "—";
+  }
+}
+
+function renderManagerContactNotes(marketingData){
+  const body = document.getElementById("managerContactNotesBody");
+  const empty = document.getElementById("managerContactNotesEmpty");
+  const wrap = document.getElementById("managerContactNotesWrap");
+  if(!body || !empty || !wrap) return;
+
+  const rows = [];
+
+  employees
+    .filter(e => isMarketingEmployee(e))
+    .forEach(emp => {
+      tasksArray(marketingData?.[emp.number]).forEach(task => {
+        const hasMeaningfulUpdate =
+          (task.note && String(task.note).trim()) ||
+          (task.status && task.status !== "جديد");
+
+        if(!hasMeaningfulUpdate) return;
+
+        rows.push({
+          employee: emp,
+          clientName: task.clientName || "—",
+          phone: task.phone || "—",
+          status: task.status || "جديد",
+          note: task.note || "—",
+          updatedAt: task.updatedAt || task.createdAt || 0
+        });
+      });
+    });
+
+  rows.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+
+  const isEmpty = rows.length === 0;
+  empty.classList.toggle("hidden", !isEmpty);
+  wrap.classList.toggle("hidden", isEmpty);
+
+  body.innerHTML = rows.map(r => `
+    <tr>
+      <td>
+        <div class="employee-name">
+          <div class="avatar">${esc(r.employee.name[0])}</div>
+          <div>
+            <strong>${esc(r.employee.name)}</strong>
+            <small>#${r.employee.number}</small>
+          </div>
+        </div>
+      </td>
+      <td><strong>${esc(r.clientName)}</strong></td>
+      <td><span class="phone-number" dir="ltr">${esc(r.phone)}</span></td>
+      <td><span class="contact-status-badge">${esc(r.status)}</span></td>
+      <td><div class="manager-note-text">${esc(r.note)}</div></td>
+      <td>${formatManagerDate(r.updatedAt)}</td>
+    </tr>
+  `).join("");
 }
