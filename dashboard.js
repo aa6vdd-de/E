@@ -75,12 +75,6 @@ function renderManagerContactNotes(marketingData){
     .filter(e => isMarketingEmployee(e))
     .forEach(emp => {
       tasksArray(marketingData?.[emp.number]).forEach(task => {
-        const hasMeaningfulUpdate =
-          (task.note && String(task.note).trim()) ||
-          (task.status && task.status !== "جديد");
-
-        if(!hasMeaningfulUpdate) return;
-
         rows.push({
           employee: emp,
           clientName: task.clientName || "—",
