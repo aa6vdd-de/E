@@ -29,7 +29,12 @@ async function addSingleTask(){
   if(!clientName||!validPhone(phone)){alert("أدخل اسم العميل ورقم تواصل صحيح");return}
   if(!deadline){alert("حدد تاريخ انتهاء المهمة");return}
   if((await getExistingPhoneSet()).has(normalizePhone(phone))){alert("هذا الرقم موجود مسبقًا في النظام.");return}
-  await db.ref("tasks/"+employeeNumber).push().set({clientName,phone,status:"جديد",note,deadline,workType:"marketing",createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
+  const newTaskRef=db.ref("tasks/"+employeeNumber).push();
+  await newTaskRef.set({clientName,phone,status:"جديد",note,deadline,workType:"marketing",createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
+  const taskSubject="تمت إضافة مهمة جديدة";
+  const taskMessage=`تمت إضافة مهمة تواصل جديدة من قبل المديرة للعميل ${clientName}، وموعد الانتهاء ${deadline}.`;
+  await createInternalNotification(employeeNumber,{title:taskSubject,message:taskMessage,type:"task",relatedId:newTaskRef.key});
+  await queueEmployeeEmail(employeeNumber,taskSubject,taskMessage,{type:"task",relatedId:newTaskRef.key});
   singleName.value="";singlePhone.value="";singleNote.value="";singleDeadline.value="";showToast("تم إرسال مهمة التواصل");
 }
 async function readSelectedFile(){
@@ -55,7 +60,12 @@ async function importBulk(){
   if(!valid.length){alert("كل الأرقام مكررة.");return}
   const ref=db.ref("tasks/"+employeeNumber),updates={};
   valid.forEach(r=>{updates[ref.push().key]={clientName:r.clientName,phone:r.phone,status:"جديد",note:"",deadline,workType:"marketing",createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"}});
-  await ref.update(updates);parsedRows=[];bulkFile.value="";bulkPaste.value="";bulkDeadline.value="";importPreview.textContent="لم يتم تحميل بيانات بعد.";
+  await ref.update(updates);
+  const bulkSubject="تمت إضافة مهام تواصل جديدة";
+  const bulkMessage=`أضافت المديرة لك ${valid.length} مهمة تواصل جديدة، وموعد الانتهاء ${deadline}.`;
+  await createInternalNotification(employeeNumber,{title:bulkSubject,message:bulkMessage,type:"task"});
+  await queueEmployeeEmail(employeeNumber,bulkSubject,bulkMessage,{type:"task"});
+  parsedRows=[];bulkFile.value="";bulkPaste.value="";bulkDeadline.value="";importPreview.textContent="لم يتم تحميل بيانات بعد.";
   showToast(skipped.length?`تم استيراد ${valid.length} وتجاهل ${skipped.length} مكرر`:`تم استيراد ${valid.length} عميل`);
 }
 async function addProjectTask(){
@@ -64,7 +74,12 @@ async function addProjectTask(){
   if(employeeNumber==="1970"&&department!=="التصميم"){alert("أحمد تابع لقسم التصميم.");return}
   if(employeeNumber==="2003"&&department!=="تصميم المواقع"){alert("يوسف 2003 تابع لتصميم المواقع.");return}
   if(employeeNumber==="2004"&&department!=="تحليل البيانات"){alert("يوسف 2004 تابع لتحليل البيانات.");return}
-  await db.ref("projectTasks/"+employeeNumber).push().set({title,clientName,clientPhone,deadline,department,description,status:"قيد التنفيذ",workType:"project",createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
+  const newProjectRef=db.ref("projectTasks/"+employeeNumber).push();
+  await newProjectRef.set({title,clientName,clientPhone,deadline,department,description,status:"قيد التنفيذ",workType:"project",createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
+  const projectSubject="تمت إضافة مشروع / مهمة جديدة";
+  const projectMessage=`أضافت المديرة مهمة "${title}" في قسم ${department}. موعد التسليم: ${deadline}.`;
+  await createInternalNotification(employeeNumber,{title:projectSubject,message:projectMessage,type:"project",relatedId:newProjectRef.key});
+  await queueEmployeeEmail(employeeNumber,projectSubject,projectMessage,{type:"project",relatedId:newProjectRef.key});
   projectTitle.value="";projectClientName.value="";projectClientPhone.value="";projectDeadline.value="";projectDescription.value="";showToast("تم إرسال مهمة المشروع");
 }
 function past(d){return d&&new Date(d+"T23:59:59").getTime()<Date.now()}
@@ -125,23 +140,18 @@ function closeEmailModal(){
   emailModal.classList.remove("show");
 }
 
-function sendWarningEmail(){
+async function sendWarningEmail(){
   const email=employeeEmail.value.trim();
   const subject=emailSubject.value.trim();
   const message=emailMessage.value.trim();
-
-  if(!email){alert("لا يوجد بريد إلكتروني لهذا الموظف. أضفه أولًا.");return}
-  if(!subject){alert("اكتب عنوان الرسالة.");return}
-  if(!message){alert("اكتب نص الرسالة.");return}
-
-  localStorage.setItem("employeeEmail_"+emailEmployeeNumber.value,email);
-
-  location.href="mailto:"+encodeURIComponent(email)+
-    "?subject="+encodeURIComponent(subject)+
-    "&body="+encodeURIComponent(message);
-
+  const employeeNumber=emailEmployeeNumber.value;
+  if(!subject){alert("اكتبي عنوان الرسالة.");return}
+  if(!message){alert("اكتبي نص التحذير.");return}
+  if(email)await saveEmployeeEmailToFirebase(employeeNumber,email);
+  await createInternalNotification(employeeNumber,{title:subject,message,type:"warning",relatedId:emailTaskId.value||""});
+  const queued=await queueEmployeeEmail(employeeNumber,subject,message,{type:"warning",relatedId:emailTaskId.value||""});
   closeEmailModal();
-  showToast("تم تجهيز رسالة البريد");
+  showToast(queued.queued?"تم إرسال الإشعار والبريد للموظف":"تم إرسال الإشعار الداخلي، ولا يوجد بريد محفوظ للموظف");
 }
 
 async function deleteTask(employeeNumber,taskId,source){

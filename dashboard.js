@@ -49,35 +49,18 @@ function saveEmployeeEmail(){
   showToast("تم حفظ بريد الموظف");
 }
 
-function sendManagerWarning(){
+async function sendManagerWarning(){
   const email=warningEmployeeEmail.value.trim();
   const subject=warningSubject.value.trim();
   const message=warningMessage.value.trim();
-
-  if(!email){alert("لا يوجد بريد إلكتروني لهذا الموظف. أضفه أولًا.");return}
-  if(!subject){alert("اكتب عنوان الرسالة.");return}
-  if(!message){alert("اكتب نص الرسالة.");return}
-
-  localStorage.setItem("employeeEmail_"+warningEmployeeNumber.value,email);
-
-  location.href="mailto:"+encodeURIComponent(email)+
-    "?subject="+encodeURIComponent(subject)+
-    "&body="+encodeURIComponent(message);
-
+  const employeeNumber=warningEmployeeNumber.value;
+  if(!subject){alert("اكتبي عنوان الرسالة.");return}
+  if(!message){alert("اكتبي نص التحذير.");return}
+  if(email)await saveEmployeeEmailToFirebase(employeeNumber,email);
+  await createInternalNotification(employeeNumber,{title:subject,message,type:"warning"});
+  const queued=await queueEmployeeEmail(employeeNumber,subject,message,{type:"warning"});
   closeManagerWarning();
-}
-
-
-function formatManagerDate(timestamp){
-  if(!timestamp) return "—";
-  try{
-    return new Date(timestamp).toLocaleString("ar-SA",{
-      year:"numeric",month:"2-digit",day:"2-digit",
-      hour:"2-digit",minute:"2-digit"
-    });
-  }catch(e){
-    return "—";
-  }
+  showToast(queued.queued?"تم إرسال الإشعار والبريد للموظف":"تم إرسال الإشعار الداخلي، ولا يوجد بريد محفوظ للموظف");
 }
 
 function renderManagerContactNotes(marketingData){
@@ -134,3 +117,16 @@ function renderManagerContactNotes(marketingData){
     </tr>
   `).join("");
 }
+
+function renderEmailQueueStatus(){
+  const box=document.getElementById("emailQueueStatus"); if(!box)return;
+  db.ref("emailQueue").limitToLast(20).on("value",snap=>{
+    const rows=snap.val()?Object.entries(snap.val()).map(([id,v])=>({id,...v})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)):[];
+    box.innerHTML=rows.length?rows.map(r=>{
+      const emp=employees.find(e=>e.number===String(r.employeeNumber));
+      const date=r.createdAt?new Date(r.createdAt).toLocaleString("ar-SA"):"";
+      return `<div class="email-queue-item"><div><strong>${esc(emp?.name||r.employeeNumber||"موظف")}</strong><small>${esc(r.to||"بدون بريد")}</small></div><div><strong>${esc(r.subject||"")}</strong><small>${date}</small></div><span class="queue-status ${esc(r.status||"pending")}">${r.status==="sent"?"تم الإرسال":r.status==="failed"?"فشل الإرسال":r.status==="sending"?"جاري الإرسال":"بانتظار الإرسال"}</span></div>`;
+    }).join(""):'<div class="empty" style="padding:20px">لا توجد رسائل بعد.</div>';
+  });
+}
+renderEmailQueueStatus();

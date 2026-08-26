@@ -709,3 +709,27 @@ input:focus,select:focus,textarea:focus{
   font-weight:700;
   white-space:nowrap;
 }
+
+/* Notifications & employee email management */
+.email-management-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.email-management-card{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fff;display:grid;gap:12px}
+.employee-notifications-panel{border-right:4px solid #d2b890}
+.notification-count{min-width:34px;height:34px;border-radius:999px;background:#eee;color:#555;display:inline-flex;align-items:center;justify-content:center;font-weight:800}
+.notification-count.has-unread{background:#d2b890;color:#24224c}
+.notification-list{display:grid;gap:10px}
+.notification-item{border:1px solid var(--line);border-radius:12px;padding:13px 14px;display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fff}
+.notification-item.warning{border-right:4px solid #d97706;background:#fffaf0}
+.notification-item.project{border-right:4px solid #24224c}
+.notification-item.task{border-right:4px solid #d2b890}
+.notification-item.read{opacity:.72}
+.notification-main p{margin:6px 0;color:var(--text);line-height:1.6}
+.notification-main small,.read-mark{color:var(--muted);font-size:12px}
+.email-queue-status{display:grid;gap:8px}
+.email-queue-item{display:grid;grid-template-columns:180px 1fr 120px;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.email-queue-item small{display:block;color:var(--muted);margin-top:3px}
+.queue-status{padding:6px 9px;border-radius:999px;text-align:center;font-size:12px;font-weight:800}
+.queue-status.pending{background:#fff4d6;color:#8a651f}
+.queue-status.sent{background:#e7f7ee;color:#247a47}
+@media(max-width:900px){.email-management-grid{grid-template-columns:1fr}.email-queue-item{grid-template-columns:1fr}}
+
+.queue-status.sending{background:#eef3ff;color:#3c5d9c}.queue-status.failed{background:#fff0f0;color:#b42318}

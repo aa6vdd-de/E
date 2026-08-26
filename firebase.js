@@ -117,3 +117,65 @@ function accountEmail(number){
   const account = accounts.find(a => a.number === String(number));
   return account?.email || "";
 }
+
+
+async function getEmployeeEmail(number){
+  const n=String(number);
+  const snap=await db.ref("profiles/"+n+"/email").once("value");
+  return snap.val() || accountEmail(n) || "";
+}
+async function saveEmployeeEmailToFirebase(number,email){
+  await db.ref("profiles/"+String(number)+"/email").set(String(email||"").trim());
+}
+async function createInternalNotification(employeeNumber,data){
+  const ref=db.ref("notifications/"+String(employeeNumber)).push();
+  await ref.set({title:data.title||"إشعار جديد",message:data.message||"",type:data.type||"general",relatedId:data.relatedId||"",read:false,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
+  return ref.key;
+}
+async function queueEmployeeEmail(employeeNumber,subject,message,meta={}){
+  const email=await getEmployeeEmail(employeeNumber);
+  if(!email)return {queued:false,reason:"no_email"};
+
+  const ref=db.ref("emailQueue").push();
+  await ref.set({
+    to:email,
+    employeeNumber:String(employeeNumber),
+    from:"1@visulallead1.com",
+    subject:String(subject||""),
+    message:String(message||""),
+    type:meta.type||"general",
+    relatedId:meta.relatedId||"",
+    status:"sending",
+    createdAt:firebase.database.ServerValue.TIMESTAMP,
+    createdBy:"2000"
+  });
+
+  try{
+    await fetch(VISUAL_LEADERSHIP_EMAIL_WEBAPP,{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({
+        to:email,
+        subject:String(subject||""),
+        message:String(message||"")
+      })
+    });
+
+    await ref.update({
+      status:"sent",
+      sentAt:firebase.database.ServerValue.TIMESTAMP
+    });
+
+    return {queued:true,sent:true,id:ref.key,email};
+  }catch(error){
+    console.error("Email send failed:",error);
+    await ref.update({
+      status:"failed",
+      error:String(error),
+      failedAt:firebase.database.ServerValue.TIMESTAMP
+    });
+    return {queued:true,sent:false,id:ref.key,email,error:String(error)};
+  }
+}
+

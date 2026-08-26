@@ -53,3 +53,30 @@ async function saveProject(id){
   showToast("تم تحديث حالة المهمة");
 }
 function logout(){sessionStorage.removeItem("currentAccount");location.href="index.html"}
+
+function startEmployeeNotifications(){
+  db.ref("notifications/"+current.number).on("value",snap=>{
+    const data=snap.val()||{};
+    const rows=Object.entries(data).map(([id,v])=>({id,...v})).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    const empty=document.getElementById("employeeNotificationsEmpty");
+    const list=document.getElementById("employeeNotifications");
+    const count=document.getElementById("unreadNotificationCount");
+    if(!empty||!list||!count)return;
+    const unread=rows.filter(n=>!n.read).length;
+    count.textContent=unread;
+    count.classList.toggle("has-unread",unread>0);
+    empty.classList.toggle("hidden",rows.length>0);
+    list.innerHTML=rows.map(n=>{
+      const cls=n.type==="warning"?"warning":n.type==="project"?"project":"task";
+      const date=n.createdAt?new Date(n.createdAt).toLocaleString("ar-SA"):"";
+      return `<article class="notification-item ${cls} ${n.read?"read":""}">
+        <div class="notification-main"><strong>${esc(n.title||"إشعار")}</strong><p>${esc(n.message||"")}</p><small>${date}</small></div>
+        ${n.read?"<span class='read-mark'>مقروء</span>":`<button class="action" onclick="markNotificationRead('${n.id}')">تحديد كمقروء</button>`}
+      </article>`;
+    }).join("");
+  });
+}
+async function markNotificationRead(id){
+  await db.ref("notifications/"+current.number+"/"+id+"/read").set(true);
+}
+startEmployeeNotifications();
