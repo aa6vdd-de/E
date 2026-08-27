@@ -116,6 +116,12 @@ async function sendManagerWarning(){
   showToast("تم تجهيز البريد — اضغطي إرسال من تطبيق البريد");
 }
 
+function formatManagerDate(timestamp){
+  if(!timestamp) return "—";
+  try{return new Date(timestamp).toLocaleString("ar-SA");}
+  catch(e){return "—";}
+}
+
 function renderManagerContactNotes(marketingData){
   const body = document.getElementById("managerContactNotesBody");
   const empty = document.getElementById("managerContactNotesEmpty");
