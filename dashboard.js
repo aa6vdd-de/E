@@ -262,6 +262,21 @@ async function sendManagerWarning(){
   }
 }
 
+function formatManagerDate(timestamp){
+  if(!timestamp) return "—";
+  try{
+    return new Date(timestamp).toLocaleString("ar-SA",{
+      year:"numeric",
+      month:"2-digit",
+      day:"2-digit",
+      hour:"2-digit",
+      minute:"2-digit"
+    });
+  }catch(error){
+    return "—";
+  }
+}
+
 function renderManagerContactNotes(marketingData){
   const body=document.getElementById("managerContactNotesBody");
   const empty=document.getElementById("managerContactNotesEmpty");
