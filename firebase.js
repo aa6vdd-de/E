@@ -14,10 +14,10 @@ const db = firebase.database();
 
 const accounts = [
   {name:"نورة", aliases:["نورة","نوره"], number:"2000", role:"manager", email:"1@visulallead1.com"},
-  {name:"أريام", aliases:["أريام","اريام"], number:"1890", role:"employee", department:"التسويق"},
-  {name:"طيف", aliases:["طيف"], number:"1818", role:"employee", department:"التسويق"},
-  {name:"دلال", aliases:["دلال"], number:"1018", role:"employee", department:"التسويق"},
-  {name:"أحمد", aliases:["أحمد","احمد"], number:"1970", role:"employee", department:"التصميم"},
+  {name:"أريام", aliases:["أريام","اريام"], number:"1890", role:"employee", department:"التسويق", email:"aoooro.123@gmail.com"},
+  {name:"طيف", aliases:["طيف"], number:"1818", role:"employee", department:"التسويق", email:"taef.6656@gmail.com"},
+  {name:"دلال", aliases:["دلال"], number:"1018", role:"employee", department:"التسويق", email:"dalalkryry@gmail.com"},
+  {name:"أحمد", aliases:["أحمد","احمد"], number:"1970", role:"employee", department:"التصميم", email:"ahmed87.af25@gmail.com"},
   {name:"يوسف", aliases:["يوسف"], number:"2003", role:"employee", department:"تصميم المواقع", email:"aa6vdd@gmail.com"},
   {name:"يوسف", aliases:["يوسف"], number:"2004", role:"employee", department:"تحليل البيانات", email:"aa6vdd@gmail.com"}
 ];
@@ -120,12 +120,19 @@ function accountEmail(number){
 
 
 async function getEmployeeEmail(number){
-  const n=String(number);
-  const snap=await db.ref("profiles/"+n+"/email").once("value");
-  return snap.val() || accountEmail(n) || "";
+  const fixed = accountEmail(String(number));
+  if(fixed) return fixed;
+  const snap = await db.ref("profiles/"+String(number)+"/email").once("value");
+  return snap.val() || "";
 }
 async function saveEmployeeEmailToFirebase(number,email){
+  const fixed = accountEmail(String(number));
+  if(fixed){
+    await db.ref("profiles/"+String(number)+"/email").set(fixed);
+    return fixed;
+  }
   await db.ref("profiles/"+String(number)+"/email").set(String(email||"").trim());
+  return String(email||"").trim();
 }
 async function createInternalNotification(employeeNumber,data){
   const ref=db.ref("notifications/"+String(employeeNumber)).push();

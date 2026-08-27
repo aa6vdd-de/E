@@ -70,7 +70,7 @@ function openManagerWarning(employeeNumber){
 
   warningEmployeeNumber.value=emp.number;
   warningEmployeeName.value=emp.name;
-  warningEmployeeEmail.value=localStorage.getItem("employeeEmail_"+emp.number)||accountEmail(emp.number)||"";
+  warningEmployeeEmail.value=accountEmail(emp.number)||"";
   warningSubject.value="";
   warningMessage.value="";
   warningSubject.placeholder="اكتب عنوان الرسالة";

@@ -127,7 +127,7 @@ function openEmailModal(employeeNumber,taskId,source){
     emailEmployeeNumber.value=employeeNumber;
     emailTaskId.value=taskId;
     emailEmployeeName.value=emp.name;
-    employeeEmail.value=localStorage.getItem("employeeEmail_"+employeeNumber)||accountEmail(employeeNumber)||"";
+    employeeEmail.value=accountEmail(employeeNumber)||"";
     emailSubject.value="";
     emailMessage.value="";
     emailSubject.placeholder="اكتب عنوان الرسالة";
