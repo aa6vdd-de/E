@@ -2,5 +2,5 @@
 عند إضافة مهمة/مشروع أو إرسال تحذير:
 1) ينشأ إشعار داخل حساب الموظف فورًا.
 2) إذا كان بريد الموظف محفوظًا، ينشأ سجل في emailQueue بحالة pending.
-الإرسال الحقيقي من 1@visulallead1.com يحتاج إكمال Gmail API / OAuth أو Cloud Function آمنة.
+الإرسال الحقيقي من aa6vdd@gmail.com يحتاج إكمال Gmail API / OAuth أو Cloud Function آمنة.
 لا تضع كلمة مرور Gmail داخل JavaScript أو GitHub Pages.

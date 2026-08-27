@@ -46,7 +46,7 @@ function doPost(e) {
     GmailApp.sendEmail(to, subject, plainBody, {
       name: "الريادة البصرية | Visual Leadership",
       htmlBody: htmlBody,
-      replyTo: "1@visulallead1.com"
+      replyTo: "aa6vdd@gmail.com"
     });
 
     return jsonResponse({
@@ -184,6 +184,6 @@ function testEmail() {
   GmailApp.sendEmail(sample.to, sample.subject, sample.message, {
     name: "الريادة البصرية | Visual Leadership",
     htmlBody: htmlBody,
-    replyTo: "1@visulallead1.com"
+    replyTo: "aa6vdd@gmail.com"
   });
 }

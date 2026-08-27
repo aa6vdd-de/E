@@ -13,7 +13,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const accounts = [
-  {name:"نورة", aliases:["نورة","نوره"], number:"2000", role:"manager", email:"1@visulallead1.com"},
+  {name:"نورة", aliases:["نورة","نوره"], number:"2000", role:"manager", email:"aa6vdd@gmail.com"},
   {name:"أريام", aliases:["أريام","اريام"], number:"1890", role:"employee", department:"التسويق", email:"aoooro.123@gmail.com"},
   {name:"طيف", aliases:["طيف"], number:"1818", role:"employee", department:"التسويق", email:"taef.6656@gmail.com"},
   {name:"دلال", aliases:["دلال"], number:"1018", role:"employee", department:"التسويق", email:"dalalkryry@gmail.com"},
@@ -149,7 +149,7 @@ async function queueEmployeeEmail(employeeNumber,subject,message,meta={}){
   await ref.set({
     to:email,
     employeeNumber:String(employeeNumber),
-    from:"1@visulallead1.com",
+    from:"aa6vdd@gmail.com",
     subject:String(subject||""),
     message:String(message||""),
     type:meta.type||"general",
