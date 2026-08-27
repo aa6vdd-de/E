@@ -40,6 +40,20 @@ function filterBySelectedMonth(items){
   return items.filter(item=>itemMonth(item)===managerSelectedMonth);
 }
 
+function contactActivityMonth(item){
+  const ts=Number(item?.updatedAt||item?.createdAt||0);
+  if(ts){
+    const d=new Date(ts);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  }
+
+  const dateText=String(item?.deadline||item?.date||"").trim();
+  const m=dateText.match(/^(\d{4})-(\d{2})/);
+  if(m) return m[1]+"-"+m[2];
+
+  return "";
+}
+
 function renderManagerDashboardForMonth(){
   const root=managerDashboardRoot||{};
   const marketing=root.tasks||{};
@@ -76,17 +90,27 @@ function renderManagerDashboardForMonth(){
   if(document.getElementById("mgrWon")) mgrWon.textContent=totalWon;
   if(document.getElementById("mgrAvg")) mgrAvg.textContent=Math.round(totalPct/employees.length||0)+"%";
 
-  // Contact notes follow the selected month too.
+  // Contact notes follow the month in which the contact/note was actually updated.
   const monthlyMarketing={};
   employees.filter(e=>isMarketingEmployee(e)).forEach(e=>{
-    const rows=filterBySelectedMonth(tasksArray(marketing[e.number]));
+    const rows=tasksArray(marketing[e.number]).filter(
+      t=>contactActivityMonth(t)===managerSelectedMonth
+    );
     monthlyMarketing[e.number]={};
     rows.forEach(t=>{ monthlyMarketing[e.number][t.id]=t; });
   });
+
   try{
     renderManagerContactNotes(monthlyMarketing);
   }catch(err){
     console.error("Contact notes render failed:",err);
+    const empty=document.getElementById("managerContactNotesEmpty");
+    const wrap=document.getElementById("managerContactNotesWrap");
+    if(empty){
+      empty.textContent="تعذر عرض سجل التواصل لهذا الشهر.";
+      empty.classList.remove("hidden");
+    }
+    if(wrap) wrap.classList.add("hidden");
   }
 
   // Monthly finance summary.
@@ -235,6 +259,9 @@ function renderManagerContactNotes(marketingData){
   rows.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
 
   const isEmpty = rows.length === 0;
+  if(isEmpty){
+    empty.textContent="لا توجد ملاحظات تواصل في "+arabicMonthLabel(managerSelectedMonth)+".";
+  }
   empty.classList.toggle("hidden", !isEmpty);
   wrap.classList.toggle("hidden", isEmpty);
 
