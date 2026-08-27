@@ -1,79 +1,59 @@
+db.ref().on("value",snap=>{
+  try{
+    const root=snap.val()||{};
+    const marketing=root.tasks||{};
+    const projects=root.projectTasks||{};
 
-let dashboardMarketingData = {};
-let dashboardProjectData = {};
+    let totalTasks=0,totalDone=0,totalWon=0,totalPct=0;
 
-function renderManagerDashboard(){
-  const marketing = dashboardMarketingData || {};
-  const projects = dashboardProjectData || {};
+    const employeeContainer=document.getElementById("dashboardEmployees");
+    if(employeeContainer){
+      employeeContainer.innerHTML=employees.map(e=>{
+        if(isMarketingEmployee(e)){
+          const s=calc(tasksArray(marketing[e.number]));
+          totalTasks+=s.total;
+          totalDone+=s.contacted;
+          totalWon+=s.won;
+          totalPct+=s.pct;
+          return card(e,s.total,s.contacted,s.won,s.pct,"تم التواصل","عملاء مكتسبون");
+        }
 
-  let totalTasks=0,totalDone=0,totalWon=0,totalPct=0;
-
-  const employeeContainer=document.getElementById("dashboardEmployees");
-  if(!employeeContainer) return;
-
-  employeeContainer.innerHTML=employees.map(e=>{
-    if(isMarketingEmployee(e)){
-      const s=calc(tasksArray(marketing[e.number]));
-      totalTasks+=s.total;
-      totalDone+=s.contacted;
-      totalWon+=s.won;
-      totalPct+=s.pct;
-      return card(e,s.total,s.contacted,s.won,s.pct,"تم التواصل","عملاء مكتسبون");
+        const s=projectStats(projectTasksArray(projects[e.number]));
+        totalTasks+=s.total;
+        totalDone+=s.completed;
+        totalPct+=s.pct;
+        return card(e,s.total,s.completed,s.overdue,s.pct,"مكتملة","متأخرة");
+      }).join("");
     }
 
-    const s=projectStats(projectTasksArray(projects[e.number]));
-    totalTasks+=s.total;
-    totalDone+=s.completed;
-    totalPct+=s.pct;
-    return card(e,s.total,s.completed,s.overdue,s.pct,"مكتملة","متأخرة");
-  }).join("");
+    const empCount=document.getElementById("mgrEmpCount");
+    const taskCount=document.getElementById("mgrTaskCount");
+    const contacted=document.getElementById("mgrContacted");
+    const won=document.getElementById("mgrWon");
+    const avg=document.getElementById("mgrAvg");
 
-  try{
-    renderManagerContactNotes(marketing);
+    if(empCount) empCount.textContent=employees.length;
+    if(taskCount) taskCount.textContent=totalTasks;
+    if(contacted) contacted.textContent=totalDone;
+    if(won) won.textContent=totalWon;
+    if(avg) avg.textContent=Math.round(totalPct/employees.length||0)+"%";
+
+    try{
+      renderManagerContactNotes(marketing);
+    }catch(notesError){
+      console.error("Contact notes render failed:",notesError);
+    }
   }catch(error){
-    console.error("Contact notes render failed:",error);
+    console.error("Manager dashboard render failed:",error);
   }
-
-  const empCount=document.getElementById("mgrEmpCount");
-  const taskCount=document.getElementById("mgrTaskCount");
-  const contacted=document.getElementById("mgrContacted");
-  const won=document.getElementById("mgrWon");
-  const avg=document.getElementById("mgrAvg");
-
-  if(empCount) empCount.textContent=employees.length;
-  if(taskCount) taskCount.textContent=totalTasks;
-  if(contacted) contacted.textContent=totalDone;
-  if(won) won.textContent=totalWon;
-  if(avg) avg.textContent=Math.round(totalPct/employees.length||0)+"%";
-}
-
-/* Render employee names immediately even before Firebase responds. */
-renderManagerDashboard();
-
-/* Read each data branch independently so one branch cannot blank the whole dashboard. */
-db.ref("tasks").on(
-  "value",
-  snap=>{
-    dashboardMarketingData=snap.val()||{};
-    renderManagerDashboard();
-  },
-  error=>{
-    console.error("Failed to load marketing tasks:",error);
-    renderManagerDashboard();
+},error=>{
+  console.error("Firebase root read failed:",error);
+  const notesEmpty=document.getElementById("managerContactNotesEmpty");
+  if(notesEmpty){
+    notesEmpty.textContent="تعذر تحميل البيانات من Firebase. تحقق من قواعد Realtime Database.";
+    notesEmpty.classList.remove("hidden");
   }
-);
-
-db.ref("projectTasks").on(
-  "value",
-  snap=>{
-    dashboardProjectData=snap.val()||{};
-    renderManagerDashboard();
-  },
-  error=>{
-    console.error("Failed to load project tasks:",error);
-    renderManagerDashboard();
-  }
-);
+});
 
 function card(e,total,a,b,pct,labelA,labelB){
   return `<article class="dashboard-employee-card">
