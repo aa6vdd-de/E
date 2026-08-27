@@ -80,6 +80,22 @@
   </section>
 </section>
 </div>
+
+<section id="externalWorkSection" class="panel hidden">
+  <div class="panel-head dashboard-section-head">
+    <div><h3>🧰 الأعمال الخارجية</h3><p>سجّل الأعمال التي أنجزتها خارج مهام التواصل مع العملاء.</p></div>
+    <button class="action primary" type="button" onclick="toggleExternalWorkForm()">+ إضافة عمل خارجي</button>
+  </div>
+  <div id="externalWorkForm" class="external-work-form hidden">
+    <div class="field"><label>عنوان العمل</label><input id="externalWorkTitle" placeholder="مثال: تصميم بوست اليوم الوطني"></div>
+    <div class="field"><label>التفاصيل</label><textarea id="externalWorkDetails" placeholder="اكتب تفاصيل العمل الذي تم تنفيذه"></textarea></div>
+    <div class="field"><label>تاريخ التنفيذ</label><input id="externalWorkDate" type="date"></div>
+    <div class="modal-actions"><button class="primary" onclick="saveExternalWork()">حفظ العمل</button><button class="secondary" onclick="toggleExternalWorkForm(false)">إلغاء</button></div>
+  </div>
+  <div id="externalWorkEmpty" class="empty" style="padding:24px">لا توجد أعمال خارجية مسجلة حتى الآن.</div>
+  <div id="externalWorkList" class="external-work-list"></div>
+</section>
+
 <div class="footer">© 2026 نظام أداء الموظفين</div>
   </main>
 </div>

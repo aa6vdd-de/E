@@ -91,3 +91,32 @@ async function deleteEmployeeNotification(id){
   showToast("تم حذف الإشعار");
 }
 startEmployeeNotifications();
+
+function toggleExternalWorkForm(force){
+  const box=document.getElementById("externalWorkForm"); if(!box)return;
+  const show=typeof force==="boolean"?force:box.classList.contains("hidden");
+  box.classList.toggle("hidden",!show);
+  if(show){const d=document.getElementById("externalWorkDate"); if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
+}
+async function saveExternalWork(){
+  const title=document.getElementById("externalWorkTitle")?.value.trim()||"";
+  const details=document.getElementById("externalWorkDetails")?.value.trim()||"";
+  const date=document.getElementById("externalWorkDate")?.value||"";
+  if(!title){alert("اكتب عنوان العمل الخارجي.");return}
+  if(!date){alert("حدد تاريخ التنفيذ.");return}
+  await db.ref("externalWorks/"+current.number).push().set({title,details,date,employeeNumber:String(current.number),employeeName:current.name||"",department:"التسويق",createdAt:firebase.database.ServerValue.TIMESTAMP});
+  document.getElementById("externalWorkTitle").value=""; document.getElementById("externalWorkDetails").value=""; document.getElementById("externalWorkDate").value="";
+  toggleExternalWorkForm(false); showToast("تم حفظ العمل الخارجي");
+}
+async function deleteExternalWork(id){if(!confirm("حذف هذا العمل الخارجي؟"))return; await db.ref("externalWorks/"+current.number+"/"+id).remove(); showToast("تم حذف العمل الخارجي");}
+function startExternalWork(){
+  const section=document.getElementById("externalWorkSection"); if(!section)return;
+  const isMarketing=isMarketingEmployee(current); section.classList.toggle("hidden",!isMarketing); if(!isMarketing)return;
+  db.ref("externalWorks/"+current.number).on("value",snap=>{
+    const rows=snap.val()?Object.entries(snap.val()).map(([id,v])=>({id,...v})).sort((a,b)=>(b.date||"").localeCompare(a.date||"")):[];
+    const empty=document.getElementById("externalWorkEmpty"), list=document.getElementById("externalWorkList");
+    empty.classList.toggle("hidden",rows.length>0);
+    list.innerHTML=rows.map(r=>`<article class="external-work-card"><div class="external-work-head"><div><strong>${esc(r.title||"—")}</strong><small>${esc(r.date||"—")}</small></div><button class="action delete-action" onclick="deleteExternalWork('${r.id}')">🗑️ حذف</button></div><p>${esc(r.details||"لا توجد تفاصيل")}</p></article>`).join("");
+  });
+}
+startExternalWork();
