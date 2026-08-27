@@ -141,18 +141,32 @@ function closeEmailModal(){
 }
 
 async function sendWarningEmail(){
-  const email=employeeEmail.value.trim();
   const subject=emailSubject.value.trim();
   const message=emailMessage.value.trim();
   const employeeNumber=emailEmployeeNumber.value;
+  const email=accountEmail(employeeNumber);
+
+  if(!email){alert("لا يوجد بريد ثابت لهذا الموظف.");return}
   if(!subject){alert("اكتبي عنوان الرسالة.");return}
   if(!message){alert("اكتبي نص التحذير.");return}
-  if(email)await saveEmployeeEmailToFirebase(employeeNumber,email);
-  await createInternalNotification(employeeNumber,{title:subject,message,type:"warning",relatedId:emailTaskId.value||""});
-  const queued=await queueEmployeeEmail(employeeNumber,subject,message,{type:"warning",relatedId:emailTaskId.value||""});
+
+  await createInternalNotification(employeeNumber,{
+    title:subject,
+    message,
+    type:"warning",
+    relatedId:emailTaskId.value||""
+  });
+
+  const mailto =
+    "mailto:"+encodeURIComponent(email)+
+    "?subject="+encodeURIComponent(subject)+
+    "&body="+encodeURIComponent(message);
+
   closeEmailModal();
-  showToast(queued.queued?"تم إرسال الإشعار والبريد للموظف":"تم إرسال الإشعار الداخلي، ولا يوجد بريد محفوظ للموظف");
+  window.location.href=mailto;
+  showToast("تم تجهيز البريد — اضغطي إرسال من تطبيق البريد");
 }
+
 
 async function deleteTask(employeeNumber,taskId,source){
   if(!confirm("هل أنت متأكدة من حذف هذه المهمة؟"))return;

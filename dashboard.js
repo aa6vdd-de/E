@@ -90,33 +90,30 @@ function saveEmployeeEmail(){
 }
 
 async function sendManagerWarning(){
-  const email=warningEmployeeEmail.value.trim();
   const subject=warningSubject.value.trim();
   const message=warningMessage.value.trim();
   const employeeNumber=warningEmployeeNumber.value;
+  const email=accountEmail(employeeNumber);
+
+  if(!email){alert("لا يوجد بريد ثابت لهذا الموظف.");return}
   if(!subject){alert("اكتبي عنوان الرسالة.");return}
   if(!message){alert("اكتبي نص التحذير.");return}
-  if(email)await saveEmployeeEmailToFirebase(employeeNumber,email);
-  await createInternalNotification(employeeNumber,{title:subject,message,type:"warning"});
-  const queued=await queueEmployeeEmail(employeeNumber,subject,message,{type:"warning"});
+
+  // Keep the internal notification in the employee account.
+  await createInternalNotification(employeeNumber,{
+    title:subject,
+    message,
+    type:"warning"
+  });
+
+  const mailto =
+    "mailto:"+encodeURIComponent(email)+
+    "?subject="+encodeURIComponent(subject)+
+    "&body="+encodeURIComponent(message);
+
   closeManagerWarning();
-  showToast(queued.queued?"تم إرسال الإشعار والبريد للموظف":"تم إرسال الإشعار الداخلي، ولا يوجد بريد محفوظ للموظف");
-}
-
-
-function formatManagerDate(timestamp){
-  if(!timestamp) return "—";
-  try{
-    return new Date(timestamp).toLocaleString("ar-SA",{
-      year:"numeric",
-      month:"2-digit",
-      day:"2-digit",
-      hour:"2-digit",
-      minute:"2-digit"
-    });
-  }catch(error){
-    return "—";
-  }
+  window.location.href=mailto;
+  showToast("تم تجهيز البريد — اضغطي إرسال من تطبيق البريد");
 }
 
 function renderManagerContactNotes(marketingData){
