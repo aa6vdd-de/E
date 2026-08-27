@@ -132,6 +132,8 @@ async function createInternalNotification(employeeNumber,data){
   await ref.set({title:data.title||"إشعار جديد",message:data.message||"",type:data.type||"general",relatedId:data.relatedId||"",read:false,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
   return ref.key;
 }
+const VISUAL_LEADERSHIP_EMAIL_WEBAPP = "https://script.google.com/macros/s/AKfycbzQjqP3IshWKs3OvVUmjAEsI1QQB0Jzcj998zS6CpBWXPwHsd9QsAYfgDZMas9HlJXE/exec";
+
 async function queueEmployeeEmail(employeeNumber,subject,message,meta={}){
   const email=await getEmployeeEmail(employeeNumber);
   if(!email)return {queued:false,reason:"no_email"};

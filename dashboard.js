@@ -28,7 +28,11 @@ function renderManagerDashboard(){
     return card(e,s.total,s.completed,s.overdue,s.pct,"مكتملة","متأخرة");
   }).join("");
 
-  renderManagerContactNotes(marketing);
+  try{
+    renderManagerContactNotes(marketing);
+  }catch(error){
+    console.error("Contact notes render failed:",error);
+  }
 
   const empCount=document.getElementById("mgrEmpCount");
   const taskCount=document.getElementById("mgrTaskCount");
@@ -117,6 +121,22 @@ async function sendManagerWarning(){
   const queued=await queueEmployeeEmail(employeeNumber,subject,message,{type:"warning"});
   closeManagerWarning();
   showToast(queued.queued?"تم إرسال الإشعار والبريد للموظف":"تم إرسال الإشعار الداخلي، ولا يوجد بريد محفوظ للموظف");
+}
+
+
+function formatManagerDate(timestamp){
+  if(!timestamp) return "—";
+  try{
+    return new Date(timestamp).toLocaleString("ar-SA",{
+      year:"numeric",
+      month:"2-digit",
+      day:"2-digit",
+      hour:"2-digit",
+      minute:"2-digit"
+    });
+  }catch(error){
+    return "—";
+  }
 }
 
 function renderManagerContactNotes(marketingData){
