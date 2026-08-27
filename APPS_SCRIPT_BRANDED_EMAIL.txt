@@ -1,0 +1,189 @@
+function doGet() {
+  return jsonResponse({
+    success: true,
+    service: "Visual Leadership Email Sender"
+  });
+}
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents || "{}");
+
+    const to = clean(data.to);
+    const employeeName = clean(data.employeeName);
+    const subject = clean(data.subject) || "إشعار من نظام الريادة البصرية";
+    const message = clean(data.message);
+    const taskTitle = clean(data.taskTitle);
+    const deadline = clean(data.deadline);
+    const department = clean(data.department);
+    const type = clean(data.type);
+
+    if (!to || !message) {
+      throw new Error("بيانات البريد ناقصة");
+    }
+
+    const isTask = type === "task" || type === "project";
+    const heading = isTask ? "تمت إضافة مهمة جديدة" : subject;
+
+    const plainBody =
+      (employeeName ? "مرحبًا " + employeeName + "\n\n" : "") +
+      message +
+      (taskTitle ? "\n\nالمهمة: " + taskTitle : "") +
+      (department ? "\nالقسم: " + department : "") +
+      (deadline ? "\nموعد التسليم: " + deadline : "") +
+      "\n\nالريادة البصرية | Visual Leadership";
+
+    const htmlBody = buildVisualLeadershipEmail({
+      employeeName: employeeName,
+      heading: heading,
+      message: message,
+      taskTitle: taskTitle,
+      department: department,
+      deadline: deadline,
+      isTask: isTask
+    });
+
+    GmailApp.sendEmail(to, subject, plainBody, {
+      name: "الريادة البصرية | Visual Leadership",
+      htmlBody: htmlBody,
+      replyTo: "1@visulallead1.com"
+    });
+
+    return jsonResponse({
+      success: true,
+      message: "تم إرسال البريد بنجاح"
+    });
+
+  } catch (error) {
+    return jsonResponse({
+      success: false,
+      error: String(error)
+    });
+  }
+}
+
+function buildVisualLeadershipEmail(data) {
+  const employeeName = escapeHtml(data.employeeName || "");
+  const heading = escapeHtml(data.heading || "");
+  const message = escapeHtml(data.message || "").replace(/\n/g, "<br>");
+  const taskTitle = escapeHtml(data.taskTitle || "");
+  const department = escapeHtml(data.department || "");
+  const deadline = escapeHtml(data.deadline || "");
+
+  let details = "";
+
+  if (taskTitle) {
+    details += detailRow("المهمة", taskTitle);
+  }
+  if (department) {
+    details += detailRow("القسم", department);
+  }
+  if (deadline) {
+    details += detailRow("موعد التسليم", deadline);
+  }
+
+  return `
+<!doctype html>
+<html dir="rtl" lang="ar">
+<body style="margin:0;padding:0;background:#f4f1eb;font-family:Arial,Tahoma,sans-serif;color:#29263f;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f1eb;padding:32px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="620" cellspacing="0" cellpadding="0" style="width:100%;max-width:620px;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #e7dfd2;">
+          <tr>
+            <td style="background:#27234d;padding:30px 34px;text-align:center;">
+              <div style="font-size:28px;font-weight:700;color:#d6bd93;letter-spacing:.3px;">الريادة البصرية</div>
+              <div style="font-size:13px;color:#ffffff;margin-top:6px;letter-spacing:1.5px;">VISUAL LEADERSHIP</div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:34px;">
+              ${employeeName ? `<div style="font-size:16px;color:#6f6a78;margin-bottom:12px;">مرحبًا ${employeeName}،</div>` : ""}
+
+              <h1 style="font-size:23px;line-height:1.5;margin:0 0 16px;color:#27234d;">${heading}</h1>
+
+              <div style="font-size:16px;line-height:1.9;color:#494554;margin-bottom:24px;">${message}</div>
+
+              ${details ? `
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#faf8f4;border:1px solid #eadfce;border-radius:12px;padding:8px 18px;margin:20px 0;">
+                ${details}
+              </table>` : ""}
+
+              ${data.isTask ? `
+              <div style="background:#f0eadf;border-right:4px solid #d6bd93;border-radius:9px;padding:14px 16px;margin-top:22px;font-size:14px;line-height:1.8;color:#514b59;">
+                يرجى الدخول إلى نظام أداء الموظفين للاطلاع على تفاصيل المهمة وتحديث حالتها.
+              </div>` : ""}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:22px 34px;background:#27234d;text-align:center;">
+              <div style="font-size:13px;color:#ffffff;">نظام إدارة أداء الموظفين</div>
+              <div style="font-size:12px;color:#d6bd93;margin-top:6px;">الريادة البصرية | Visual Leadership</div>
+              <div style="font-size:11px;color:#c7c3d0;margin-top:12px;">هذه رسالة آلية، يرجى عدم مشاركة محتواها خارج نطاق العمل.</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function detailRow(label, value) {
+  return `
+    <tr>
+      <td style="padding:10px 0;color:#777080;font-size:13px;width:120px;">${escapeHtml(label)}</td>
+      <td style="padding:10px 0;color:#27234d;font-size:14px;font-weight:700;">${value}</td>
+    </tr>`;
+}
+
+function clean(value) {
+  return String(value || "").trim();
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function jsonResponse(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function testEmail() {
+  const sample = {
+    to: "aa6vdd@gmail.com",
+    employeeName: "موظف تجريبي",
+    subject: "تمت إضافة مهمة جديدة",
+    message: "تم إسناد مهمة جديدة لك من إدارة الريادة البصرية.",
+    taskTitle: "تصميم الصفحة الرئيسية",
+    department: "تصميم المواقع",
+    deadline: "2026-08-31",
+    type: "project"
+  };
+
+  const htmlBody = buildVisualLeadershipEmail({
+    employeeName: sample.employeeName,
+    heading: "تمت إضافة مهمة جديدة",
+    message: sample.message,
+    taskTitle: sample.taskTitle,
+    department: sample.department,
+    deadline: sample.deadline,
+    isTask: true
+  });
+
+  GmailApp.sendEmail(sample.to, sample.subject, sample.message, {
+    name: "الريادة البصرية | Visual Leadership",
+    htmlBody: htmlBody,
+    replyTo: "1@visulallead1.com"
+  });
+}

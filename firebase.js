@@ -166,8 +166,14 @@ async function queueEmployeeEmail(employeeNumber,subject,message,meta={}){
       headers:{"Content-Type":"text/plain;charset=utf-8"},
       body:JSON.stringify({
         to:email,
+        employeeNumber:String(employeeNumber),
+        employeeName:(accounts.find(a=>a.number===String(employeeNumber))||{}).name||"",
         subject:String(subject||""),
-        message:String(message||"")
+        message:String(message||""),
+        type:meta.type||"general",
+        deadline:meta.deadline||"",
+        taskTitle:meta.taskTitle||"",
+        department:meta.department||""
       })
     });
 

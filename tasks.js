@@ -34,7 +34,7 @@ async function addSingleTask(){
   const taskSubject="تمت إضافة مهمة جديدة";
   const taskMessage=`تمت إضافة مهمة تواصل جديدة من قبل المديرة للعميل ${clientName}، وموعد الانتهاء ${deadline}.`;
   await createInternalNotification(employeeNumber,{title:taskSubject,message:taskMessage,type:"task",relatedId:newTaskRef.key});
-  await queueEmployeeEmail(employeeNumber,taskSubject,taskMessage,{type:"task",relatedId:newTaskRef.key});
+  await queueEmployeeEmail(employeeNumber,taskSubject,taskMessage,{type:"task",relatedId:newTaskRef.key,deadline,taskTitle:clientName,department:"التسويق"});
   singleName.value="";singlePhone.value="";singleNote.value="";singleDeadline.value="";showToast("تم إرسال مهمة التواصل");
 }
 async function readSelectedFile(){
@@ -64,7 +64,7 @@ async function importBulk(){
   const bulkSubject="تمت إضافة مهام تواصل جديدة";
   const bulkMessage=`أضافت المديرة لك ${valid.length} مهمة تواصل جديدة، وموعد الانتهاء ${deadline}.`;
   await createInternalNotification(employeeNumber,{title:bulkSubject,message:bulkMessage,type:"task"});
-  await queueEmployeeEmail(employeeNumber,bulkSubject,bulkMessage,{type:"task"});
+  await queueEmployeeEmail(employeeNumber,bulkSubject,bulkMessage,{type:"task",deadline,taskTitle:valid.length+" مهام تواصل",department:"التسويق"});
   parsedRows=[];bulkFile.value="";bulkPaste.value="";bulkDeadline.value="";importPreview.textContent="لم يتم تحميل بيانات بعد.";
   showToast(skipped.length?`تم استيراد ${valid.length} وتجاهل ${skipped.length} مكرر`:`تم استيراد ${valid.length} عميل`);
 }
@@ -79,7 +79,7 @@ async function addProjectTask(){
   const projectSubject="تمت إضافة مشروع / مهمة جديدة";
   const projectMessage=`أضافت المديرة مهمة "${title}" في قسم ${department}. موعد التسليم: ${deadline}.`;
   await createInternalNotification(employeeNumber,{title:projectSubject,message:projectMessage,type:"project",relatedId:newProjectRef.key});
-  await queueEmployeeEmail(employeeNumber,projectSubject,projectMessage,{type:"project",relatedId:newProjectRef.key});
+  await queueEmployeeEmail(employeeNumber,projectSubject,projectMessage,{type:"project",relatedId:newProjectRef.key,deadline,taskTitle:title,department});
   projectTitle.value="";projectClientName.value="";projectClientPhone.value="";projectDeadline.value="";projectDescription.value="";showToast("تم إرسال مهمة المشروع");
 }
 function past(d){return d&&new Date(d+"T23:59:59").getTime()<Date.now()}
