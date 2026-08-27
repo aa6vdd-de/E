@@ -13,7 +13,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const accounts = [
-  {name:"نورة", aliases:["نورة","نوره"], number:"2000", role:"manager", email:"aa6vdd@gmail.com"},
+  {name:"نورة", aliases:["نورة","نوره"], number:"2000", role:"manager", email:"1@visulallead1.com"},
   {name:"أريام", aliases:["أريام","اريام"], number:"1890", role:"employee", department:"التسويق", email:"aoooro.123@gmail.com"},
   {name:"طيف", aliases:["طيف"], number:"1818", role:"employee", department:"التسويق", email:"taef.6656@gmail.com"},
   {name:"دلال", aliases:["دلال"], number:"1018", role:"employee", department:"التسويق", email:"dalalkryry@gmail.com"},
@@ -139,7 +139,7 @@ async function createInternalNotification(employeeNumber,data){
   await ref.set({title:data.title||"إشعار جديد",message:data.message||"",type:data.type||"general",relatedId:data.relatedId||"",read:false,createdAt:firebase.database.ServerValue.TIMESTAMP,createdBy:"2000"});
   return ref.key;
 }
-const VISUAL_LEADERSHIP_EMAIL_WEBAPP = "https://script.google.com/macros/s/AKfycbzQjqP3IshWKs3OvVUmjAEsI1QQB0Jzcj998zS6CpBWXPwHsd9QsAYfgDZMas9HlJXE/exec";
+const VISUAL_LEADERSHIP_EMAIL_WEBAPP = "https://script.google.com/macros/s/AKfycbwfxoHTsHI64BLOpO6se_AXamgkYfhcPJgpR5f8fVSWFsdlK9DdOTMi_OLXn0StUutb/exec";
 
 async function queueEmployeeEmail(employeeNumber,subject,message,meta={}){
   const email=await getEmployeeEmail(employeeNumber);
@@ -149,7 +149,7 @@ async function queueEmployeeEmail(employeeNumber,subject,message,meta={}){
   await ref.set({
     to:email,
     employeeNumber:String(employeeNumber),
-    from:"aa6vdd@gmail.com",
+    from:"1@visulallead1.com",
     subject:String(subject||""),
     message:String(message||""),
     type:meta.type||"general",
