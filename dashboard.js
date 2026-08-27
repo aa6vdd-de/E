@@ -1,56 +1,146 @@
-db.ref().on("value",snap=>{
-  try{
-    const root=snap.val()||{};
-    const marketing=root.tasks||{};
-    const projects=root.projectTasks||{};
 
-    let totalTasks=0,totalDone=0,totalWon=0,totalPct=0;
+let managerDashboardRoot = {};
+let managerSelectedMonth = (() => {
+  const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+})();
 
-    const employeeContainer=document.getElementById("dashboardEmployees");
-    if(employeeContainer){
-      employeeContainer.innerHTML=employees.map(e=>{
-        if(isMarketingEmployee(e)){
-          const s=calc(tasksArray(marketing[e.number]));
-          totalTasks+=s.total;
-          totalDone+=s.contacted;
-          totalWon+=s.won;
-          totalPct+=s.pct;
-          return card(e,s.total,s.contacted,s.won,s.pct,"تم التواصل","عملاء مكتسبون");
-        }
+function itemMonth(item){
+  const dateText=String(item?.deadline||item?.date||item?.createdDate||"").trim();
+  const m=dateText.match(/^(\d{4})-(\d{2})/);
+  if(m) return m[1]+"-"+m[2];
 
-        const s=projectStats(projectTasksArray(projects[e.number]));
-        totalTasks+=s.total;
-        totalDone+=s.completed;
-        totalPct+=s.pct;
-        return card(e,s.total,s.completed,s.overdue,s.pct,"مكتملة","متأخرة");
-      }).join("");
-    }
-
-    const empCount=document.getElementById("mgrEmpCount");
-    const taskCount=document.getElementById("mgrTaskCount");
-    const contacted=document.getElementById("mgrContacted");
-    const won=document.getElementById("mgrWon");
-    const avg=document.getElementById("mgrAvg");
-
-    if(empCount) empCount.textContent=employees.length;
-    if(taskCount) taskCount.textContent=totalTasks;
-    if(contacted) contacted.textContent=totalDone;
-    if(won) won.textContent=totalWon;
-    if(avg) avg.textContent=Math.round(totalPct/employees.length||0)+"%";
-
-    try{
-      renderManagerContactNotes(marketing);
-    }catch(notesError){
-      console.error("Contact notes render failed:",notesError);
-    }
-  }catch(error){
-    console.error("Manager dashboard render failed:",error);
+  const ts=Number(item?.createdAt||item?.updatedAt||0);
+  if(ts){
+    const d=new Date(ts);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
   }
+  return "";
+}
+
+function financeMonth(row){
+  const explicit=String(row?.month||"").match(/^(\d{4})-(\d{2})/);
+  if(explicit) return explicit[1]+"-"+explicit[2];
+
+  const ts=Number(row?.createdAt||0);
+  if(ts){
+    const d=new Date(ts);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  }
+  return "";
+}
+
+function arabicMonthLabel(ym){
+  if(!ym) return "—";
+  const [y,m]=ym.split("-").map(Number);
+  return new Date(y,m-1,1).toLocaleDateString("ar-SA",{year:"numeric",month:"long"});
+}
+
+function filterBySelectedMonth(items){
+  return items.filter(item=>itemMonth(item)===managerSelectedMonth);
+}
+
+function renderManagerDashboardForMonth(){
+  const root=managerDashboardRoot||{};
+  const marketing=root.tasks||{};
+  const projects=root.projectTasks||{};
+  const distributions=root.profitDistributions||{};
+
+  let totalTasks=0,totalDone=0,totalWon=0,totalPct=0;
+
+  const employeeContainer=document.getElementById("dashboardEmployees");
+  if(employeeContainer){
+    employeeContainer.innerHTML=employees.map(e=>{
+      if(isMarketingEmployee(e)){
+        const monthTasks=filterBySelectedMonth(tasksArray(marketing[e.number]));
+        const s=calc(monthTasks);
+        totalTasks+=s.total;
+        totalDone+=s.contacted;
+        totalWon+=s.won;
+        totalPct+=s.pct;
+        return card(e,s.total,s.contacted,s.won,s.pct,"تم التواصل","عملاء مكتسبون");
+      }
+
+      const monthProjects=filterBySelectedMonth(projectTasksArray(projects[e.number]));
+      const s=projectStats(monthProjects);
+      totalTasks+=s.total;
+      totalDone+=s.completed;
+      totalPct+=s.pct;
+      return card(e,s.total,s.completed,s.overdue,s.pct,"مكتملة","متأخرة");
+    }).join("");
+  }
+
+  if(document.getElementById("mgrEmpCount")) mgrEmpCount.textContent=employees.length;
+  if(document.getElementById("mgrTaskCount")) mgrTaskCount.textContent=totalTasks;
+  if(document.getElementById("mgrContacted")) mgrContacted.textContent=totalDone;
+  if(document.getElementById("mgrWon")) mgrWon.textContent=totalWon;
+  if(document.getElementById("mgrAvg")) mgrAvg.textContent=Math.round(totalPct/employees.length||0)+"%";
+
+  // Contact notes follow the selected month too.
+  const monthlyMarketing={};
+  employees.filter(e=>isMarketingEmployee(e)).forEach(e=>{
+    const rows=filterBySelectedMonth(tasksArray(marketing[e.number]));
+    monthlyMarketing[e.number]={};
+    rows.forEach(t=>{ monthlyMarketing[e.number][t.id]=t; });
+  });
+  try{
+    renderManagerContactNotes(monthlyMarketing);
+  }catch(err){
+    console.error("Contact notes render failed:",err);
+  }
+
+  // Monthly finance summary.
+  const monthFinance=Object.values(distributions).filter(r=>financeMonth(r)===managerSelectedMonth);
+  const totalRevenue=monthFinance.reduce((s,r)=>s+Number(r.total||0),0);
+  const totalNet=monthFinance.reduce((s,r)=>s+Number(r.netProfit||0),0);
+  const margin=totalRevenue?totalNet/totalRevenue*100:0;
+
+  const picker=document.getElementById("managerMonthPicker");
+  if(picker) picker.value=managerSelectedMonth;
+  const monthLabel=document.getElementById("managerSelectedMonthLabel");
+  if(monthLabel) monthLabel.textContent=arabicMonthLabel(managerSelectedMonth);
+  const mt=document.getElementById("managerMonthTasks");
+  if(mt) mt.textContent=totalTasks;
+  const mc=document.getElementById("managerMonthCompleted");
+  if(mc) mc.textContent=totalDone;
+  const mn=document.getElementById("managerMonthNet");
+  if(mn) mn.textContent=new Intl.NumberFormat("ar-SA",{maximumFractionDigits:2}).format(totalNet)+" ر.س";
+  const mm=document.getElementById("managerMonthMargin");
+  if(mm) mm.textContent=(Math.round(margin*100)/100)+"%";
+
+  // Update headings so manager always knows which month is being viewed.
+  const head=document.querySelector(".head h2");
+  if(head) head.textContent="الصفحة العامة — "+arabicMonthLabel(managerSelectedMonth);
+}
+
+function changeManagerMonth(delta){
+  const [y,m]=managerSelectedMonth.split("-").map(Number);
+  const d=new Date(y,m-1+delta,1);
+  managerSelectedMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  renderManagerDashboardForMonth();
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  const picker=document.getElementById("managerMonthPicker");
+  if(picker){
+    picker.value=managerSelectedMonth;
+    picker.addEventListener("change",()=>{
+      if(picker.value) managerSelectedMonth=picker.value;
+      renderManagerDashboardForMonth();
+    });
+  }
+  document.getElementById("managerPrevMonth")?.addEventListener("click",()=>changeManagerMonth(-1));
+  document.getElementById("managerNextMonth")?.addEventListener("click",()=>changeManagerMonth(1));
+});
+
+db.ref().on("value",snap=>{
+  managerDashboardRoot=snap.val()||{};
+  renderManagerDashboardForMonth();
 },error=>{
   console.error("Firebase root read failed:",error);
   const notesEmpty=document.getElementById("managerContactNotesEmpty");
   if(notesEmpty){
-    notesEmpty.textContent="تعذر تحميل البيانات من Firebase. تحقق من قواعد Realtime Database.";
+    notesEmpty.textContent="تعذر تحميل البيانات من Firebase.";
     notesEmpty.classList.remove("hidden");
   }
 });
@@ -187,99 +277,3 @@ function renderEmailQueueStatus(){
   });
 }
 renderEmailQueueStatus();
-
-
-/* ===== Monthly manager view ===== */
-let managerMonthlyRoot = {};
-let managerSelectedMonth = (() => {
-  const d=new Date();
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
-})();
-
-function itemMonth(item){
-  const dateText=String(item?.deadline||item?.date||item?.createdDate||"").trim();
-  const m=dateText.match(/^(\d{4})-(\d{2})/);
-  if(m) return m[1]+"-"+m[2];
-  const ts=Number(item?.createdAt||item?.updatedAt||0);
-  if(ts){
-    const d=new Date(ts);
-    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
-  }
-  return "";
-}
-
-function financeMonth(row){
-  const explicit=String(row?.month||"").match(/^(\d{4})-(\d{2})/);
-  if(explicit) return explicit[1]+"-"+explicit[2];
-  const ts=Number(row?.createdAt||0);
-  if(!ts) return "";
-  const d=new Date(ts);
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
-}
-
-function arabicMonthLabel(ym){
-  if(!ym) return "—";
-  const [y,m]=ym.split("-").map(Number);
-  return new Date(y,m-1,1).toLocaleDateString("ar-SA",{year:"numeric",month:"long"});
-}
-
-function renderManagerMonthlyView(){
-  const picker=document.getElementById("managerMonthPicker");
-  if(!picker) return;
-  picker.value=managerSelectedMonth;
-
-  const root=managerMonthlyRoot||{};
-  const marketing=root.tasks||{};
-  const projects=root.projectTasks||{};
-  const distributions=root.profitDistributions||{};
-
-  let total=0,done=0;
-  employees.forEach(emp=>{
-    if(isMarketingEmployee(emp)){
-      tasksArray(marketing[emp.number]).filter(t=>itemMonth(t)===managerSelectedMonth).forEach(t=>{
-        total++;
-        if(t.status && t.status!=="جديد") done++;
-      });
-    }else{
-      projectTasksArray(projects[emp.number]).filter(t=>itemMonth(t)===managerSelectedMonth).forEach(t=>{
-        total++;
-        if(t.status==="مكتملة") done++;
-      });
-    }
-  });
-
-  const monthFinance=Object.values(distributions).filter(r=>financeMonth(r)===managerSelectedMonth);
-  const totalRevenue=monthFinance.reduce((s,r)=>s+Number(r.total||0),0);
-  const totalNet=monthFinance.reduce((s,r)=>s+Number(r.netProfit||0),0);
-  const margin=totalRevenue?totalNet/totalRevenue*100:0;
-
-  document.getElementById("managerSelectedMonthLabel").textContent=arabicMonthLabel(managerSelectedMonth);
-  document.getElementById("managerMonthTasks").textContent=total;
-  document.getElementById("managerMonthCompleted").textContent=done;
-  document.getElementById("managerMonthNet").textContent=new Intl.NumberFormat("ar-SA",{maximumFractionDigits:2}).format(totalNet)+" ر.س";
-  document.getElementById("managerMonthMargin").textContent=(Math.round(margin*100)/100)+"%";
-}
-
-function changeManagerMonth(delta){
-  const [y,m]=managerSelectedMonth.split("-").map(Number);
-  const d=new Date(y,m-1+delta,1);
-  managerSelectedMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
-  renderManagerMonthlyView();
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-  const picker=document.getElementById("managerMonthPicker");
-  if(!picker)return;
-  picker.addEventListener("change",()=>{
-    managerSelectedMonth=picker.value||managerSelectedMonth;
-    renderManagerMonthlyView();
-  });
-  document.getElementById("managerPrevMonth")?.addEventListener("click",()=>changeManagerMonth(-1));
-  document.getElementById("managerNextMonth")?.addEventListener("click",()=>changeManagerMonth(1));
-  renderManagerMonthlyView();
-});
-
-db.ref().on("value",snap=>{
-  managerMonthlyRoot=snap.val()||{};
-  renderManagerMonthlyView();
-});
