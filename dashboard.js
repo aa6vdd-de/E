@@ -106,14 +106,15 @@ async function sendManagerWarning(){
     type:"warning"
   });
 
-  const mailto =
-    "mailto:"+encodeURIComponent(email)+
-    "?subject="+encodeURIComponent(subject)+
+  const gmailUrl =
+    "https://mail.google.com/mail/?view=cm&fs=1"+
+    "&to="+encodeURIComponent(email)+
+    "&su="+encodeURIComponent(subject)+
     "&body="+encodeURIComponent(message);
 
-  closeManagerWarning();
-  window.location.href=mailto;
-  showToast("تم تجهيز البريد — اضغطي إرسال من تطبيق البريد");
+    closeManagerWarning();
+  window.open(gmailUrl,"_blank");
+  showToast("تم تجهيز الرسالة في Gmail — اضغطي إرسال");
 }
 
 function formatManagerDate(timestamp){
