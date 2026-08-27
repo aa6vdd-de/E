@@ -40,18 +40,24 @@ function filterBySelectedMonth(items){
   return items.filter(item=>itemMonth(item)===managerSelectedMonth);
 }
 
-function contactActivityMonth(item){
-  const ts=Number(item?.updatedAt||item?.createdAt||0);
+function contactLogMonth(item){
+  // Employee communication belongs to the month of the last saved update.
+  const ts=Number(item?.updatedAt||0);
   if(ts){
     const d=new Date(ts);
     return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
   }
 
-  const dateText=String(item?.deadline||item?.date||"").trim();
-  const m=dateText.match(/^(\d{4})-(\d{2})/);
-  if(m) return m[1]+"-"+m[2];
+  // Legacy records: fall back to creation timestamp, then task date/deadline.
+  const created=Number(item?.createdAt||0);
+  if(created){
+    const d=new Date(created);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  }
 
-  return "";
+  const dateText=String(item?.date||item?.deadline||"").trim();
+  const m=dateText.match(/^(\d{4})-(\d{2})/);
+  return m ? m[1]+"-"+m[2] : "";
 }
 
 function renderManagerDashboardForMonth(){
@@ -90,27 +96,25 @@ function renderManagerDashboardForMonth(){
   if(document.getElementById("mgrWon")) mgrWon.textContent=totalWon;
   if(document.getElementById("mgrAvg")) mgrAvg.textContent=Math.round(totalPct/employees.length||0)+"%";
 
-  // Contact notes follow the month in which the contact/note was actually updated.
-  const monthlyMarketing={};
+  // Communication log follows the selected month.
+  const monthlyContactLog={};
   employees.filter(e=>isMarketingEmployee(e)).forEach(e=>{
-    const rows=tasksArray(marketing[e.number]).filter(
-      t=>contactActivityMonth(t)===managerSelectedMonth
-    );
-    monthlyMarketing[e.number]={};
-    rows.forEach(t=>{ monthlyMarketing[e.number][t.id]=t; });
+    const rows=tasksArray(marketing[e.number]).filter(t=>{
+      const note=String(t.note||"").trim();
+      const status=String(t.status||"جديد").trim();
+      const hasActivity=note || status!=="جديد" || t.updatedAt;
+      if(!hasActivity) return false;
+      return contactLogMonth(t)===managerSelectedMonth;
+    });
+
+    monthlyContactLog[e.number]={};
+    rows.forEach(t=>{ monthlyContactLog[e.number][t.id]=t; });
   });
 
   try{
-    renderManagerContactNotes(monthlyMarketing);
+    renderManagerContactNotes(monthlyContactLog);
   }catch(err){
     console.error("Contact notes render failed:",err);
-    const empty=document.getElementById("managerContactNotesEmpty");
-    const wrap=document.getElementById("managerContactNotesWrap");
-    if(empty){
-      empty.textContent="تعذر عرض سجل التواصل لهذا الشهر.";
-      empty.classList.remove("hidden");
-    }
-    if(wrap) wrap.classList.add("hidden");
   }
 
   // Monthly finance summary.
@@ -234,38 +238,48 @@ async function sendManagerWarning(){
 }
 
 function renderManagerContactNotes(marketingData){
-  const body = document.getElementById("managerContactNotesBody");
-  const empty = document.getElementById("managerContactNotesEmpty");
-  const wrap = document.getElementById("managerContactNotesWrap");
+  const body=document.getElementById("managerContactNotesBody");
+  const empty=document.getElementById("managerContactNotesEmpty");
+  const wrap=document.getElementById("managerContactNotesWrap");
   if(!body || !empty || !wrap) return;
 
-  const rows = [];
+  const rows=[];
 
   employees
-    .filter(e => isMarketingEmployee(e))
-    .forEach(emp => {
-      tasksArray(marketingData?.[emp.number]).forEach(task => {
+    .filter(e=>isMarketingEmployee(e))
+    .forEach(emp=>{
+      tasksArray(marketingData?.[emp.number]).forEach(task=>{
+        const note=String(task.note||"").trim();
+        const status=String(task.status||"جديد").trim();
+
+        // Show only records that the employee actually interacted with.
+        if(!note && status==="جديد" && !task.updatedAt) return;
+
         rows.push({
-          employee: emp,
-          clientName: task.clientName || "—",
-          phone: task.phone || "—",
-          status: task.status || "جديد",
-          note: task.note || "—",
-          updatedAt: task.updatedAt || task.createdAt || 0
+          employee:emp,
+          clientName:task.clientName||"—",
+          phone:task.phone||"—",
+          status:status||"جديد",
+          note:note||"—",
+          updatedAt:task.updatedAt||task.createdAt||0
         });
       });
     });
 
   rows.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
 
-  const isEmpty = rows.length === 0;
-  if(isEmpty){
+  if(!rows.length){
+    body.innerHTML="";
+    wrap.classList.add("hidden");
     empty.textContent="لا توجد ملاحظات تواصل في "+arabicMonthLabel(managerSelectedMonth)+".";
+    empty.classList.remove("hidden");
+    return;
   }
-  empty.classList.toggle("hidden", !isEmpty);
-  wrap.classList.toggle("hidden", isEmpty);
 
-  body.innerHTML = rows.map(r => `
+  empty.classList.add("hidden");
+  wrap.classList.remove("hidden");
+
+  body.innerHTML=rows.map(r=>`
     <tr>
       <td>
         <div class="employee-name">
