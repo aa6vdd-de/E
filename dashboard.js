@@ -1,20 +1,76 @@
 
-db.ref().on("value",snap=>{
-  const root=snap.val()||{},marketing=root.tasks||{},projects=root.projectTasks||{};
+let dashboardMarketingData = {};
+let dashboardProjectData = {};
+
+function renderManagerDashboard(){
+  const marketing = dashboardMarketingData || {};
+  const projects = dashboardProjectData || {};
+
   let totalTasks=0,totalDone=0,totalWon=0,totalPct=0;
-  dashboardEmployees.innerHTML=employees.map(e=>{
+
+  const employeeContainer=document.getElementById("dashboardEmployees");
+  if(!employeeContainer) return;
+
+  employeeContainer.innerHTML=employees.map(e=>{
     if(isMarketingEmployee(e)){
       const s=calc(tasksArray(marketing[e.number]));
-      totalTasks+=s.total;totalDone+=s.contacted;totalWon+=s.won;totalPct+=s.pct;
+      totalTasks+=s.total;
+      totalDone+=s.contacted;
+      totalWon+=s.won;
+      totalPct+=s.pct;
       return card(e,s.total,s.contacted,s.won,s.pct,"تم التواصل","عملاء مكتسبون");
     }
+
     const s=projectStats(projectTasksArray(projects[e.number]));
-    totalTasks+=s.total;totalDone+=s.completed;totalPct+=s.pct;
+    totalTasks+=s.total;
+    totalDone+=s.completed;
+    totalPct+=s.pct;
     return card(e,s.total,s.completed,s.overdue,s.pct,"مكتملة","متأخرة");
   }).join("");
+
   renderManagerContactNotes(marketing);
-  mgrEmpCount.textContent=employees.length;mgrTaskCount.textContent=totalTasks;mgrContacted.textContent=totalDone;mgrWon.textContent=totalWon;mgrAvg.textContent=Math.round(totalPct/employees.length||0)+"%";
-});
+
+  const empCount=document.getElementById("mgrEmpCount");
+  const taskCount=document.getElementById("mgrTaskCount");
+  const contacted=document.getElementById("mgrContacted");
+  const won=document.getElementById("mgrWon");
+  const avg=document.getElementById("mgrAvg");
+
+  if(empCount) empCount.textContent=employees.length;
+  if(taskCount) taskCount.textContent=totalTasks;
+  if(contacted) contacted.textContent=totalDone;
+  if(won) won.textContent=totalWon;
+  if(avg) avg.textContent=Math.round(totalPct/employees.length||0)+"%";
+}
+
+/* Render employee names immediately even before Firebase responds. */
+renderManagerDashboard();
+
+/* Read each data branch independently so one branch cannot blank the whole dashboard. */
+db.ref("tasks").on(
+  "value",
+  snap=>{
+    dashboardMarketingData=snap.val()||{};
+    renderManagerDashboard();
+  },
+  error=>{
+    console.error("Failed to load marketing tasks:",error);
+    renderManagerDashboard();
+  }
+);
+
+db.ref("projectTasks").on(
+  "value",
+  snap=>{
+    dashboardProjectData=snap.val()||{};
+    renderManagerDashboard();
+  },
+  error=>{
+    console.error("Failed to load project tasks:",error);
+    renderManagerDashboard();
+  }
+);
+
 function card(e,total,a,b,pct,labelA,labelB){
   return `<article class="dashboard-employee-card">
     <div class="dashboard-employee-top"><div class="employee-name"><div class="avatar">${esc(e.name[0])}</div><div><strong>${esc(e.name)}</strong><small>#${e.number}</small></div></div><button class="action warning-action" onclick="openManagerWarning('${e.number}')">✉️ تحذير</button></div>
@@ -121,6 +177,9 @@ function renderEmailQueueStatus(){
       const date=r.createdAt?new Date(r.createdAt).toLocaleString("ar-SA"):"";
       return `<div class="email-queue-item"><div><strong>${esc(emp?.name||r.employeeNumber||"موظف")}</strong><small>${esc(r.to||"بدون بريد")}</small></div><div><strong>${esc(r.subject||"")}</strong><small>${date}</small></div><span class="queue-status ${esc(r.status||"pending")}">${r.status==="sent"?"تم الإرسال":r.status==="failed"?"فشل الإرسال":r.status==="sending"?"جاري الإرسال":"بانتظار الإرسال"}</span></div>`;
     }).join(""):'<div class="empty" style="padding:20px">لا توجد رسائل بعد.</div>';
+  },error=>{
+    console.error("Failed to load email queue:",error);
+    box.innerHTML='<div class="empty" style="padding:20px">تعذر تحميل سجل البريد فقط، وباقي بيانات الصفحة تعمل بشكل طبيعي.</div>';
   });
 }
 renderEmailQueueStatus();
