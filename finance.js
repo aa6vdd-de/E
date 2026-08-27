@@ -95,6 +95,7 @@ async function saveDistribution(){
 
   await db.ref("profitDistributions").push().set({
     projectName,
+    month: financeMonth.value || new Date().toISOString().slice(0,7),
     total:calc.total,
     baseCosts:calc.base,
     extraCosts:calc.extra,
@@ -111,6 +112,7 @@ async function saveDistribution(){
 
 function resetDistribution(){
   financeProjectName.value="";
+  financeMonth.value=new Date().toISOString().slice(0,7);
   financeTotal.value="";
   financeBaseCosts.value=0;
   financeExtraCosts.value=0;
@@ -153,3 +155,5 @@ async function deleteDistribution(id){
 
 renderBeneficiaries();
 calculateFinance();
+
+if(typeof financeMonth!=="undefined" && financeMonth) financeMonth.value=new Date().toISOString().slice(0,7);

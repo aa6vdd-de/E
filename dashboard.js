@@ -187,3 +187,99 @@ function renderEmailQueueStatus(){
   });
 }
 renderEmailQueueStatus();
+
+
+/* ===== Monthly manager view ===== */
+let managerMonthlyRoot = {};
+let managerSelectedMonth = (() => {
+  const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+})();
+
+function itemMonth(item){
+  const dateText=String(item?.deadline||item?.date||item?.createdDate||"").trim();
+  const m=dateText.match(/^(\d{4})-(\d{2})/);
+  if(m) return m[1]+"-"+m[2];
+  const ts=Number(item?.createdAt||item?.updatedAt||0);
+  if(ts){
+    const d=new Date(ts);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  }
+  return "";
+}
+
+function financeMonth(row){
+  const explicit=String(row?.month||"").match(/^(\d{4})-(\d{2})/);
+  if(explicit) return explicit[1]+"-"+explicit[2];
+  const ts=Number(row?.createdAt||0);
+  if(!ts) return "";
+  const d=new Date(ts);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+}
+
+function arabicMonthLabel(ym){
+  if(!ym) return "—";
+  const [y,m]=ym.split("-").map(Number);
+  return new Date(y,m-1,1).toLocaleDateString("ar-SA",{year:"numeric",month:"long"});
+}
+
+function renderManagerMonthlyView(){
+  const picker=document.getElementById("managerMonthPicker");
+  if(!picker) return;
+  picker.value=managerSelectedMonth;
+
+  const root=managerMonthlyRoot||{};
+  const marketing=root.tasks||{};
+  const projects=root.projectTasks||{};
+  const distributions=root.profitDistributions||{};
+
+  let total=0,done=0;
+  employees.forEach(emp=>{
+    if(isMarketingEmployee(emp)){
+      tasksArray(marketing[emp.number]).filter(t=>itemMonth(t)===managerSelectedMonth).forEach(t=>{
+        total++;
+        if(t.status && t.status!=="جديد") done++;
+      });
+    }else{
+      projectTasksArray(projects[emp.number]).filter(t=>itemMonth(t)===managerSelectedMonth).forEach(t=>{
+        total++;
+        if(t.status==="مكتملة") done++;
+      });
+    }
+  });
+
+  const monthFinance=Object.values(distributions).filter(r=>financeMonth(r)===managerSelectedMonth);
+  const totalRevenue=monthFinance.reduce((s,r)=>s+Number(r.total||0),0);
+  const totalNet=monthFinance.reduce((s,r)=>s+Number(r.netProfit||0),0);
+  const margin=totalRevenue?totalNet/totalRevenue*100:0;
+
+  document.getElementById("managerSelectedMonthLabel").textContent=arabicMonthLabel(managerSelectedMonth);
+  document.getElementById("managerMonthTasks").textContent=total;
+  document.getElementById("managerMonthCompleted").textContent=done;
+  document.getElementById("managerMonthNet").textContent=new Intl.NumberFormat("ar-SA",{maximumFractionDigits:2}).format(totalNet)+" ر.س";
+  document.getElementById("managerMonthMargin").textContent=(Math.round(margin*100)/100)+"%";
+}
+
+function changeManagerMonth(delta){
+  const [y,m]=managerSelectedMonth.split("-").map(Number);
+  const d=new Date(y,m-1+delta,1);
+  managerSelectedMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  renderManagerMonthlyView();
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  const picker=document.getElementById("managerMonthPicker");
+  if(!picker)return;
+  picker.addEventListener("change",()=>{
+    managerSelectedMonth=picker.value||managerSelectedMonth;
+    renderManagerMonthlyView();
+  });
+  document.getElementById("managerPrevMonth")?.addEventListener("click",()=>changeManagerMonth(-1));
+  document.getElementById("managerNextMonth")?.addEventListener("click",()=>changeManagerMonth(1));
+  renderManagerMonthlyView();
+});
+
+db.ref().on("value",snap=>{
+  managerMonthlyRoot=snap.val()||{};
+  renderManagerMonthlyView();
+});

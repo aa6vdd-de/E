@@ -41,6 +41,28 @@
     <div class="card"><small>متوسط الإنجاز</small><strong id="mgrAvg">0%</strong></div>
   </section>
 
+  <section class="panel monthly-manager-panel">
+    <div class="panel-head dashboard-section-head">
+      <div>
+        <h3>📅 عرض الشهر</h3>
+        <p>اختاري الشهر لعرض مهامه ومشاريعه وربحيته فقط.</p>
+      </div>
+      <div class="month-nav">
+        <button class="action" id="managerPrevMonth" type="button">‹ الشهر السابق</button>
+        <input id="managerMonthPicker" type="month">
+        <button class="action" id="managerNextMonth" type="button">الشهر التالي ›</button>
+      </div>
+    </div>
+    <div class="monthly-summary-grid">
+      <div><small>الشهر المحدد</small><strong id="managerSelectedMonthLabel">—</strong></div>
+      <div><small>المهام والمشاريع</small><strong id="managerMonthTasks">0</strong></div>
+      <div><small>المكتمل / تم التواصل</small><strong id="managerMonthCompleted">0</strong></div>
+      <div><small>صافي الربح</small><strong id="managerMonthNet">0 ر.س</strong></div>
+      <div><small>نسبة الربح</small><strong id="managerMonthMargin">0%</strong></div>
+    </div>
+  </section>
+
+
   <section class="panel">
     <div class="panel-head dashboard-section-head">
       <div>

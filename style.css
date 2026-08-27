@@ -733,3 +733,13 @@ input:focus,select:focus,textarea:focus{
 @media(max-width:900px){.email-management-grid{grid-template-columns:1fr}.email-queue-item{grid-template-columns:1fr}}
 
 .queue-status.sending{background:#eef3ff;color:#3c5d9c}.queue-status.failed{background:#fff0f0;color:#b42318}
+
+.notification-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.month-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.month-nav input{min-height:42px;border:1px solid var(--border);border-radius:10px;padding:7px 10px;background:#fff}
+.monthly-summary-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:18px}
+.monthly-summary-grid>div{background:#fbf8f2;border:1px solid #eadfce;border-radius:14px;padding:16px}
+.monthly-summary-grid small{display:block;color:var(--muted);margin-bottom:7px}
+.monthly-summary-grid strong{font-size:20px}
+@media(max-width:900px){.monthly-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.monthly-summary-grid{grid-template-columns:1fr}}

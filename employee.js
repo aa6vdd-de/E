@@ -71,12 +71,23 @@ function startEmployeeNotifications(){
       const date=n.createdAt?new Date(n.createdAt).toLocaleString("ar-SA"):"";
       return `<article class="notification-item ${cls} ${n.read?"read":""}">
         <div class="notification-main"><strong>${esc(n.title||"إشعار")}</strong><p>${esc(n.message||"")}</p><small>${date}</small></div>
-        ${n.read?"<span class='read-mark'>مقروء</span>":`<button class="action" onclick="markNotificationRead('${n.id}')">تحديد كمقروء</button>`}
+        ${n.read?`<div class="notification-actions"><span class="read-mark">مقروء</span><button class="action delete-action" onclick="deleteEmployeeNotification('${n.id}')">🗑️ حذف</button></div>`:`<button class="action" onclick="markNotificationRead('${n.id}')">تحديد كمقروء</button>`}
       </article>`;
     }).join("");
   });
 }
 async function markNotificationRead(id){
   await db.ref("notifications/"+current.number+"/"+id+"/read").set(true);
+}
+async function deleteEmployeeNotification(id){
+  const snap=await db.ref("notifications/"+current.number+"/"+id).once("value");
+  if(!snap.exists()) return;
+  if(!snap.val().read){
+    alert("اقرأ الإشعار أولًا ثم يمكنك حذفه.");
+    return;
+  }
+  if(!confirm("حذف هذا الإشعار بعد قراءته؟")) return;
+  await db.ref("notifications/"+current.number+"/"+id).remove();
+  showToast("تم حذف الإشعار");
 }
 startEmployeeNotifications();
