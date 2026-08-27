@@ -1,4 +1,5 @@
 
+let managerContactEmployeeFilter = "";
 let managerDashboardRoot = {};
 let managerSelectedMonth = (() => {
   const d=new Date();
@@ -174,6 +175,21 @@ function changeManagerMonth(delta){
 }
 
 document.addEventListener("DOMContentLoaded",()=>{
+  const contactFilter=document.getElementById("contactEmployeeFilter");
+  if(contactFilter){
+    employees.filter(e=>isMarketingEmployee(e)).forEach(e=>{
+      const option=document.createElement("option");
+      option.value=e.number;
+      option.textContent=e.name+" #"+e.number;
+      contactFilter.appendChild(option);
+    });
+    contactFilter.value=managerContactEmployeeFilter;
+    contactFilter.addEventListener("change",()=>{
+      managerContactEmployeeFilter=contactFilter.value||"";
+      renderManagerDashboardForMonth();
+    });
+  }
+
   const picker=document.getElementById("managerMonthPicker");
   if(picker){
     picker.value=managerSelectedMonth;
@@ -288,6 +304,7 @@ function renderManagerContactNotes(marketingData){
 
   employees
     .filter(e=>isMarketingEmployee(e))
+    .filter(e=>!managerContactEmployeeFilter || String(e.number)===String(managerContactEmployeeFilter))
     .forEach(emp=>{
       tasksArray(marketingData?.[emp.number]).forEach(task=>{
         const note=String(task.note||"").trim();

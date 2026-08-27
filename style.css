@@ -749,3 +749,7 @@ input:focus,select:focus,textarea:focus{
 #managerContactNotesEmpty.hidden{display:none!important}
 
 .external-work-form{background:#fbf8f2;border:1px solid #eadfce;border-radius:14px;padding:18px;margin:16px}.external-work-list{display:grid;gap:12px;padding:0 16px 18px}.external-work-card{border:1px solid var(--border);border-radius:14px;padding:16px;background:#fff}.external-work-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.external-work-head small{display:block;color:var(--muted);margin-top:4px}.external-work-card p{margin:12px 0 0;line-height:1.8;color:#555}.external-work-filters{display:flex;gap:10px;flex-wrap:wrap}.external-work-filters select,.external-work-filters input{min-height:42px;border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:#fff}
+
+.contact-log-filter{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.contact-log-filter label{font-size:13px;color:var(--muted)}
+.contact-log-filter select{min-height:42px;border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:#fff;min-width:190px}
