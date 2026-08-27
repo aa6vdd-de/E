@@ -18,7 +18,7 @@ const accounts = [
   {name:"طيف", aliases:["طيف"], number:"1818", role:"employee", department:"التسويق", email:"taef.6656@gmail.com"},
   {name:"دلال", aliases:["دلال"], number:"1018", role:"employee", department:"التسويق", email:"dalalkryry@gmail.com"},
   {name:"أحمد", aliases:["أحمد","احمد"], number:"1970", role:"employee", department:"التصميم", email:"ahmed87.af25@gmail.com"},
-  {name:"يوسف", aliases:["يوسف"], number:"2003", role:"employee", department:"تصميم المواقع", email:"aa6vdd@gmail.com"},
+  {name:"يوسف", aliases:["يوسف"], number:"2003", role:"employee", department:"تصميم المواقع", email:"yusef.alrashidi0@gmail.com"},
   {name:"يوسف", aliases:["يوسف"], number:"2004", role:"employee", department:"تحليل البيانات", email:"aa6vdd@gmail.com"}
 ];
 
