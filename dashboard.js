@@ -183,34 +183,30 @@ async function sendManagerWarning(){
   const subject=warningSubject.value.trim();
   const message=warningMessage.value.trim();
   const employeeNumber=warningEmployeeNumber.value;
-  const email=accountEmail(employeeNumber);
 
-  if(!email){alert("لا يوجد بريد ثابت لهذا الموظف.");return}
+  if(!accountEmail(employeeNumber)){alert("لا يوجد بريد ثابت لهذا الموظف.");return}
   if(!subject){alert("اكتبي عنوان الرسالة.");return}
   if(!message){alert("اكتبي نص التحذير.");return}
 
-  // Keep the internal notification in the employee account.
-  await createInternalNotification(employeeNumber,{
-    title:subject,
-    message,
-    type:"warning"
-  });
+  try{
+    await createInternalNotification(employeeNumber,{
+      title:subject,
+      message,
+      type:"warning"
+    });
 
-  const gmailUrl =
-    "https://mail.google.com/mail/?view=cm&fs=1"+
-    "&to="+encodeURIComponent(email)+
-    "&su="+encodeURIComponent(subject)+
-    "&body="+encodeURIComponent(message);
+    await queueEmployeeEmail(employeeNumber,subject,message,{
+      type:"warning",
+      taskTitle:"تنبيه إداري",
+      department:"الإدارة"
+    });
 
     closeManagerWarning();
-  window.open(gmailUrl,"_blank");
-  showToast("تم تجهيز الرسالة في Gmail — اضغطي إرسال");
-}
-
-function formatManagerDate(timestamp){
-  if(!timestamp) return "—";
-  try{return new Date(timestamp).toLocaleString("ar-SA");}
-  catch(e){return "—";}
+    showToast("تم إرسال التحذير للموظف عبر البريد والإشعارات");
+  }catch(error){
+    console.error("Warning send failed:",error);
+    alert("تعذر إرسال التحذير. حاولي مرة أخرى.");
+  }
 }
 
 function renderManagerContactNotes(marketingData){
